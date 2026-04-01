@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -48,6 +47,10 @@
       background-color: #2a2a2a;
       color: #9e9e9e;
     }
+    .exercise-svg {
+      width: 64px;
+      height: 64px;
+    }
   </style>
 </head>
 <body class="min-h-screen pb-8">
@@ -64,39 +67,276 @@
   </header>
 
   <main class="px-4 mt-4">
-    <p id="subtitle-a" class="text-sm text-gray-400 mb-3 hidden">פלג גוף עליון וכוח</p>
-    <p id="subtitle-b" class="text-sm text-gray-400 mb-3 hidden">ליבה, רגליים ויציבות</p>
+    <p id="subtitle-a" class="text-sm text-gray-400 mb-3 hidden">מאסטר פלג גוף עליון – כוח, סיבולת ומיומנות</p>
+    <p id="subtitle-b" class="text-sm text-gray-400 mb-3 hidden">רגליים עוצמתיות וליבה חזקה</p>
 
     <div id="grid-a" class="grid grid-cols-2 gap-3 hidden"></div>
     <div id="grid-b" class="grid grid-cols-2 gap-3 hidden"></div>
   </main>
 
   <script>
+    // SVG illustrations matching the infographic poses
+
+    const svgPullUp = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Bar -->
+      <rect x="10" y="8" width="60" height="4" rx="2" fill="#555"/>
+      <rect x="12" y="4" width="4" height="8" rx="1" fill="#666"/>
+      <rect x="64" y="4" width="4" height="8" rx="1" fill="#666"/>
+      <!-- Person hanging and pulling up -->
+      <circle cx="40" cy="22" r="6" fill="#4FC3F7"/>
+      <!-- Arms reaching up to bar -->
+      <line x1="34" y1="20" x2="26" y2="12" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+      <line x1="46" y1="20" x2="54" y2="12" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+      <!-- Torso -->
+      <line x1="40" y1="28" x2="40" y2="48" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs straight -->
+      <line x1="40" y1="48" x2="34" y2="66" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="48" x2="46" y2="66" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+    </svg>`;
+
+    const svgDips = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Parallel bars -->
+      <rect x="8" y="30" width="24" height="4" rx="2" fill="#555"/>
+      <rect x="48" y="30" width="24" height="4" rx="2" fill="#555"/>
+      <rect x="8" y="30" width="4" height="20" rx="1" fill="#666"/>
+      <rect x="68" y="30" width="4" height="20" rx="1" fill="#666"/>
+      <!-- Person between bars, arms extended -->
+      <circle cx="40" cy="20" r="6" fill="#FF7043"/>
+      <!-- Arms on bars -->
+      <line x1="34" y1="24" x2="28" y2="32" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <line x1="46" y1="24" x2="52" y2="32" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <!-- Torso -->
+      <line x1="40" y1="26" x2="40" y2="48" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs hanging, slightly forward -->
+      <line x1="40" y1="48" x2="36" y2="66" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="48" x2="44" y2="66" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+    </svg>`;
+
+    const svgSphinx = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Person in sphinx push-up: forearms on ground, pushing up -->
+      <circle cx="62" cy="30" r="5" fill="#AB47BC"/>
+      <!-- Back/torso angled -->
+      <line x1="58" y1="34" x2="30" y2="42" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
+      <!-- Forearms on ground -->
+      <line x1="56" y1="36" x2="50" y2="50" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
+      <line x1="50" y1="50" x2="56" y2="54" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs extended back -->
+      <line x1="30" y1="42" x2="20" y2="50" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
+      <line x1="20" y1="50" x2="12" y2="54" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
+      <!-- Ground line -->
+      <line x1="6" y1="56" x2="74" y2="56" stroke="#333" stroke-width="1.5"/>
+    </svg>`;
+
+    const svg90Hold = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Bar -->
+      <rect x="10" y="8" width="60" height="4" rx="2" fill="#555"/>
+      <rect x="12" y="4" width="4" height="8" rx="1" fill="#666"/>
+      <rect x="64" y="4" width="4" height="8" rx="1" fill="#666"/>
+      <!-- Person holding at 90 degrees -->
+      <circle cx="40" cy="22" r="6" fill="#FFA726"/>
+      <!-- Arms bent at 90° on bar -->
+      <line x1="34" y1="20" x2="28" y2="12" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
+      <line x1="46" y1="20" x2="52" y2="12" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
+      <!-- Torso -->
+      <line x1="40" y1="28" x2="40" y2="44" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs straight -->
+      <line x1="40" y1="44" x2="34" y2="62" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="44" x2="46" y2="62" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
+      <!-- 90° indicator -->
+      <text x="58" y="26" fill="#FFA726" font-size="10" font-weight="bold">90°</text>
+    </svg>`;
+
+    const svgChinUp = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Bar -->
+      <rect x="10" y="8" width="60" height="4" rx="2" fill="#555"/>
+      <rect x="12" y="4" width="4" height="8" rx="1" fill="#666"/>
+      <rect x="64" y="4" width="4" height="8" rx="1" fill="#666"/>
+      <!-- Person chin above bar (supinated grip) -->
+      <circle cx="40" cy="16" r="5" fill="#66BB6A"/>
+      <!-- Arms gripping bar (closer grip, palms facing) -->
+      <line x1="36" y1="18" x2="32" y2="12" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
+      <line x1="44" y1="18" x2="48" y2="12" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
+      <!-- Torso -->
+      <line x1="40" y1="21" x2="40" y2="44" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs -->
+      <line x1="40" y1="44" x2="34" y2="64" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="44" x2="46" y2="64" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
+      <!-- Underhand grip indicators -->
+      <circle cx="32" cy="12" r="2" fill="#66BB6A"/>
+      <circle cx="48" cy="12" r="2" fill="#66BB6A"/>
+    </svg>`;
+
+    const svgWidePushUp = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Person in wide push-up position -->
+      <circle cx="64" cy="28" r="5" fill="#42A5F5"/>
+      <!-- Torso horizontal -->
+      <line x1="60" y1="32" x2="22" y2="36" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
+      <!-- Arms wide apart, hands on ground -->
+      <line x1="56" y1="32" x2="62" y2="48" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
+      <line x1="36" y1="34" x2="30" y2="48" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs -->
+      <line x1="22" y1="36" x2="16" y2="46" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
+      <line x1="16" y1="46" x2="12" y2="48" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
+      <!-- Ground line -->
+      <line x1="6" y1="50" x2="74" y2="50" stroke="#333" stroke-width="1.5"/>
+    </svg>`;
+
+    const svgFrogStand = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Person in frog stand: hands on ground, knees on elbows, balanced -->
+      <circle cx="40" cy="22" r="5" fill="#26C6DA"/>
+      <!-- Torso tilted forward -->
+      <line x1="40" y1="27" x2="40" y2="40" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
+      <!-- Arms straight down to ground -->
+      <line x1="36" y1="30" x2="28" y2="48" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
+      <line x1="44" y1="30" x2="52" y2="48" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
+      <!-- Knees tucked up on elbows -->
+      <line x1="40" y1="40" x2="32" y2="36" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="40" x2="48" y2="36" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
+      <!-- Hands on ground -->
+      <circle cx="28" cy="48" r="2.5" fill="#26C6DA"/>
+      <circle cx="52" cy="48" r="2.5" fill="#26C6DA"/>
+      <!-- Ground line -->
+      <line x1="6" y1="52" x2="74" y2="52" stroke="#333" stroke-width="1.5"/>
+    </svg>`;
+
+    const svgLowDips = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Low parallel bars / bench dips -->
+      <rect x="10" y="42" width="60" height="3" rx="1.5" fill="#555"/>
+      <rect x="12" y="42" width="3" height="14" rx="1" fill="#666"/>
+      <rect x="65" y="42" width="3" height="14" rx="1" fill="#666"/>
+      <!-- Person dipping down between low bars -->
+      <circle cx="40" cy="26" r="5" fill="#EF5350"/>
+      <!-- Arms on bars -->
+      <line x1="34" y1="30" x2="24" y2="44" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
+      <line x1="46" y1="30" x2="56" y2="44" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
+      <!-- Torso going down -->
+      <line x1="40" y1="31" x2="40" y2="50" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs forward -->
+      <line x1="40" y1="50" x2="34" y2="64" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="50" x2="46" y2="64" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
+    </svg>`;
+
+    // === Workout B SVGs ===
+
+    const svgSquat = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Person in squat position -->
+      <circle cx="40" cy="16" r="6" fill="#FF7043"/>
+      <!-- Torso upright -->
+      <line x1="40" y1="22" x2="40" y2="40" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <!-- Arms forward for balance -->
+      <line x1="36" y1="28" x2="24" y2="30" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <line x1="44" y1="28" x2="56" y2="30" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs bent in squat -->
+      <line x1="40" y1="40" x2="30" y2="50" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <line x1="30" y1="50" x2="28" y2="62" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="40" x2="50" y2="50" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <line x1="50" y1="50" x2="52" y2="62" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+      <!-- Ground -->
+      <line x1="10" y1="64" x2="70" y2="64" stroke="#333" stroke-width="1.5"/>
+    </svg>`;
+
+    const svgLegRaiseLying = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Person lying on back, raising legs -->
+      <circle cx="16" cy="42" r="5" fill="#FFD54F"/>
+      <!-- Torso lying flat -->
+      <line x1="21" y1="44" x2="44" y2="44" stroke="#FFD54F" stroke-width="3" stroke-linecap="round"/>
+      <!-- Arms on ground -->
+      <line x1="24" y1="44" x2="20" y2="50" stroke="#FFD54F" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="30" y1="44" x2="26" y2="50" stroke="#FFD54F" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Legs raised at angle -->
+      <line x1="44" y1="44" x2="58" y2="22" stroke="#FFD54F" stroke-width="3" stroke-linecap="round"/>
+      <line x1="44" y1="44" x2="62" y2="24" stroke="#FFD54F" stroke-width="3" stroke-linecap="round"/>
+      <!-- Ground line -->
+      <line x1="6" y1="52" x2="74" y2="52" stroke="#333" stroke-width="1.5"/>
+    </svg>`;
+
+    const svgHangingLegRaise = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Bar -->
+      <rect x="10" y="6" width="60" height="4" rx="2" fill="#555"/>
+      <!-- Person hanging, legs raised forward -->
+      <circle cx="40" cy="18" r="5" fill="#CE93D8"/>
+      <!-- Arms up to bar -->
+      <line x1="36" y1="16" x2="30" y2="10" stroke="#CE93D8" stroke-width="3" stroke-linecap="round"/>
+      <line x1="44" y1="16" x2="50" y2="10" stroke="#CE93D8" stroke-width="3" stroke-linecap="round"/>
+      <!-- Torso -->
+      <line x1="40" y1="23" x2="40" y2="44" stroke="#CE93D8" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs raised forward (L-shape) -->
+      <line x1="40" y1="44" x2="28" y2="46" stroke="#CE93D8" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="44" x2="26" y2="50" stroke="#CE93D8" stroke-width="3" stroke-linecap="round"/>
+    </svg>`;
+
+    const svgBridge = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Person in glute bridge: back arched, hips up -->
+      <!-- Head on ground -->
+      <circle cx="16" cy="40" r="5" fill="#4DB6AC"/>
+      <!-- Upper back on ground, hips raised -->
+      <line x1="21" y1="42" x2="30" y2="40" stroke="#4DB6AC" stroke-width="3" stroke-linecap="round"/>
+      <line x1="30" y1="40" x2="44" y2="28" stroke="#4DB6AC" stroke-width="3" stroke-linecap="round"/>
+      <line x1="44" y1="28" x2="52" y2="36" stroke="#4DB6AC" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs bent, feet on ground -->
+      <line x1="52" y1="36" x2="56" y2="48" stroke="#4DB6AC" stroke-width="3" stroke-linecap="round"/>
+      <!-- Arms flat on ground -->
+      <line x1="24" y1="42" x2="22" y2="50" stroke="#4DB6AC" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Ground line -->
+      <line x1="6" y1="50" x2="74" y2="50" stroke="#333" stroke-width="1.5"/>
+    </svg>`;
+
+    const svgPlank = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Person in extended plank position -->
+      <circle cx="64" cy="30" r="5" fill="#7986CB"/>
+      <!-- Torso straight and horizontal -->
+      <line x1="60" y1="34" x2="20" y2="38" stroke="#7986CB" stroke-width="3" stroke-linecap="round"/>
+      <!-- Arms straight down -->
+      <line x1="56" y1="34" x2="56" y2="50" stroke="#7986CB" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs extended, toes on ground -->
+      <line x1="20" y1="38" x2="12" y2="50" stroke="#7986CB" stroke-width="3" stroke-linecap="round"/>
+      <!-- Ground line -->
+      <line x1="6" y1="52" x2="74" y2="52" stroke="#333" stroke-width="1.5"/>
+    </svg>`;
+
+    const svgLunge = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Person in lunge / cossack squat -->
+      <circle cx="40" cy="14" r="6" fill="#AED581"/>
+      <!-- Torso upright -->
+      <line x1="40" y1="20" x2="40" y2="38" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
+      <!-- Arms on hips -->
+      <line x1="36" y1="26" x2="30" y2="32" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
+      <line x1="44" y1="26" x2="50" y2="32" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
+      <!-- Front leg bent -->
+      <line x1="40" y1="38" x2="30" y2="50" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
+      <line x1="30" y1="50" x2="28" y2="62" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
+      <!-- Back leg extended -->
+      <line x1="40" y1="38" x2="54" y2="48" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
+      <line x1="54" y1="48" x2="64" y2="52" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
+      <!-- Ground -->
+      <line x1="10" y1="64" x2="70" y2="64" stroke="#333" stroke-width="1.5"/>
+    </svg>`;
+
     const workoutA = [
-      { name: "עליות מתח (טכניקה)", url: "https://www.youtube.com/watch?v=RoxKbyst0To", icon: "arrow-up-circle" },
-      { name: "מקבילים (Dips)", url: "https://www.youtube.com/watch?v=2Tz7LpA3PzY", icon: "arrow-down-circle" },
-      { name: "שכיבות סמיכה ספינקס (יד אחורית)", url: "https://www.youtube.com/watch?v=Xz7K6K6u5r8", icon: "move-horizontal" },
-      { name: "איך לעשות יותר מתח (מתקדם)", url: "https://www.youtube.com/watch?v=ZfX_E4lYjB0", icon: "trending-up" },
-      { name: "יד קדמית על המתח", url: "https://www.youtube.com/watch?v=R9YqNf4F0Gk", icon: "grip-horizontal" },
-      { name: "וריאציות שכיבות סמיכה", url: "https://www.youtube.com/watch?v=7_hKj8Nf-vE", icon: "repeat" },
-      { name: "עמידת צפרדע (Frog Stand)", url: "https://www.youtube.com/watch?v=F0S1_WvG80c", icon: "hand" },
-      { name: "חזה וכתפיים (מקבילים נמוכים)", url: "https://www.youtube.com/watch?v=vV_n3JmS_oU", icon: "dumbbell" },
+      { name: "עליות מתח (טכניקה)", url: "https://www.youtube.com/watch?v=RoxKbyst0To", svg: svgPullUp },
+      { name: "מקבילים (Dips)", url: "https://www.youtube.com/watch?v=2Tz7LpA3PzY", svg: svgDips },
+      { name: "שכיבות סמיכה ספינקס (יד אחורית)", url: "https://www.youtube.com/watch?v=Xz7K6K6u5r8", svg: svgSphinx },
+      { name: "איך לעשות יותר מתח (מתקדם)", url: "https://www.youtube.com/watch?v=ZfX_E4lYjB0", svg: svg90Hold },
+      { name: "יד קדמית על המתח", url: "https://www.youtube.com/watch?v=R9YqNf4F0Gk", svg: svgChinUp },
+      { name: "וריאציות שכיבות סמיכה", url: "https://www.youtube.com/watch?v=7_hKj8Nf-vE", svg: svgWidePushUp },
+      { name: "עמידת צפרדע (Frog Stand)", url: "https://www.youtube.com/watch?v=F0S1_WvG80c", svg: svgFrogStand },
+      { name: "חזה וכתפיים (מקבילים נמוכים)", url: "https://www.youtube.com/watch?v=vV_n3JmS_oU", svg: svgLowDips },
     ];
 
     const workoutB = [
-      { name: "אימון רגליים מלא (15 דקות)", url: "https://www.youtube.com/watch?v=svoaqltrANc", icon: "footprints" },
-      { name: "אימון בטן מתקדם (15 דקות)", url: "https://www.youtube.com/watch?v=u5M011lRLak", icon: "flame" },
-      { name: "הרמות רגליים (Leg Raises)", url: "https://youtube.com/shorts/VFjA6-65b2c", icon: "move-vertical" },
-      { name: "גשר (Glute Bridge)", url: "https://youtube.com/shorts/X_IGw8U_e38", icon: "bridge" },
-      { name: "יסודות ליבה ופלאנק", url: "https://www.youtube.com/watch?v=axnHz5iPYCk", icon: "shield" },
-      { name: "תרגילי רגליים וסקוואט", url: "https://www.youtube.com/watch?v=9K9lTOQ8uEM", icon: "zap" },
+      { name: "אימון רגליים מלא (15 דקות)", url: "https://www.youtube.com/watch?v=svoaqltrANc", svg: svgSquat },
+      { name: "אימון בטן מתקדם (15 דקות)", url: "https://www.youtube.com/watch?v=u5M011lRLak", svg: svgLegRaiseLying },
+      { name: "הרמות רגליים (Leg Raises)", url: "https://youtube.com/shorts/VFjA6-65b2c", svg: svgHangingLegRaise },
+      { name: "גשר (Glute Bridge)", url: "https://youtube.com/shorts/X_IGw8U_e38", svg: svgBridge },
+      { name: "יסודות ליבה ופלאנק", url: "https://www.youtube.com/watch?v=axnHz5iPYCk", svg: svgPlank },
+      { name: "תרגילי רגליים וסקוואט", url: "https://www.youtube.com/watch?v=9K9lTOQ8uEM", svg: svgLunge },
     ];
 
     function createCard(exercise) {
       return `
         <a href="${exercise.url}" target="_blank" rel="noopener noreferrer"
-           class="card rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-center min-h-[130px] no-underline">
-          <i data-lucide="${exercise.icon}" class="w-8 h-8 text-[#00e676]"></i>
+           class="card rounded-2xl p-4 flex flex-col items-center justify-center gap-2 text-center min-h-[160px] no-underline">
+          ${exercise.svg}
           <span class="text-sm font-medium leading-tight text-gray-200">${exercise.name}</span>
         </a>
       `;
@@ -105,7 +345,6 @@
     function renderCards() {
       document.getElementById('grid-a').innerHTML = workoutA.map(createCard).join('');
       document.getElementById('grid-b').innerHTML = workoutB.map(createCard).join('');
-      lucide.createIcons();
     }
 
     function switchTab(tab) {
