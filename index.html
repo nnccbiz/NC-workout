@@ -3,368 +3,500 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>אימון כושר</title>
+  <title>תוכנית קליסטניקס - שלב 1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['Heebo', 'sans-serif'],
-          },
+          fontFamily: { sans: ['Heebo', 'sans-serif'] },
+          colors: {
+            dark: { 900: '#0a0a0a', 800: '#121212', 700: '#1a1a1a', 600: '#1e1e1e', 500: '#252525', 400: '#2a2a2a' },
+            accent: { DEFAULT: '#00e676', dim: '#00c853', glow: 'rgba(0,230,118,0.15)' },
+            superset: '#ff6d00',
+          }
         },
       },
     }
   </script>
   <style>
-    body {
-      font-family: 'Heebo', sans-serif;
-      background-color: #121212;
-      color: #ffffff;
-    }
-    .card {
-      background-color: #1e1e1e;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .card:active {
-      transform: scale(0.97);
-    }
-    @media (hover: hover) {
-      .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 20px rgba(0, 230, 118, 0.15);
-      }
-    }
-    .tab-active {
-      background-color: #00e676;
-      color: #121212;
-      font-weight: 700;
-    }
-    .tab-inactive {
-      background-color: #2a2a2a;
-      color: #9e9e9e;
-    }
-    .exercise-svg {
-      width: 64px;
-      height: 64px;
-    }
+    body { font-family: 'Heebo', sans-serif; background: #0a0a0a; color: #e0e0e0; }
+    .glass { background: rgba(30,30,30,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); }
+    .exercise-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .exercise-card:active { transform: scale(0.98); }
+    @media (hover:hover) { .exercise-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,230,118,0.12); } }
+    .exercise-svg { width: 52px; height: 52px; flex-shrink: 0; }
+    .video-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,0,0,0.12); color: #ff4444; border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; font-weight: 500; text-decoration: none; transition: background 0.2s; }
+    .video-btn:hover { background: rgba(255,0,0,0.22); }
+    .section-header { position: relative; padding-right: 16px; }
+    .section-header::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 4px; border-radius: 2px; background: #00e676; }
+    .schedule-day { min-width: 48px; text-align: center; padding: 6px 4px; border-radius: 10px; font-size: 0.75rem; }
+    .schedule-workout { background: rgba(0,230,118,0.15); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+    .schedule-rest { background: rgba(255,255,255,0.04); color: #666; }
+    .challenge-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .challenge-item { background: #1e1e1e; border-radius: 12px; padding: 8px 16px; font-weight: 600; white-space: nowrap; }
+    .challenge-arrow { color: #00e676; font-size: 1.2rem; }
   </style>
 </head>
-<body class="min-h-screen pb-8">
-  <header class="sticky top-0 z-10 bg-[#121212] pt-4 pb-2 px-4">
-    <h1 class="text-center text-2xl font-bold mb-4 text-[#00e676]">💪 אימון כושר</h1>
-    <div class="flex gap-2">
-      <button id="tab-a" onclick="switchTab('a')" class="flex-1 py-3 rounded-xl text-lg transition-colors duration-200">
-        אימון A
-      </button>
-      <button id="tab-b" onclick="switchTab('b')" class="flex-1 py-3 rounded-xl text-lg transition-colors duration-200">
-        אימון B
-      </button>
+<body class="min-h-screen pb-12">
+
+  <!-- Header -->
+  <header class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-[#00e676]/8 to-transparent"></div>
+    <div class="relative px-5 pt-8 pb-6 text-center">
+      <div class="inline-block mb-3 px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent border border-accent/20">
+        שלב 1 - The Foundation Stage
+      </div>
+      <h1 class="text-3xl font-extrabold text-white mb-2">תוכנית קליסטניקס</h1>
+      <p class="text-sm text-gray-400 max-w-xs mx-auto">בניית בסיס כוח, סיבולת ומיומנות בתרגילי משקל גוף</p>
     </div>
   </header>
 
-  <main class="px-4 mt-4">
-    <p id="subtitle-a" class="text-sm text-gray-400 mb-3 hidden">מאסטר פלג גוף עליון – כוח, סיבולת ומיומנות</p>
-    <p id="subtitle-b" class="text-sm text-gray-400 mb-3 hidden">רגליים עוצמתיות וליבה חזקה</p>
+  <!-- Navigation Tabs -->
+  <nav class="sticky top-0 z-30 glass px-4 py-3">
+    <div class="flex gap-2">
+      <button onclick="showSection('program')" id="nav-program" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-accent text-dark-900">
+        תוכנית
+      </button>
+      <button onclick="showSection('workout')" id="nav-workout" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-dark-400 text-gray-400">
+        האימון
+      </button>
+      <button onclick="showSection('challenge')" id="nav-challenge" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-dark-400 text-gray-400">
+        אתגר מעבר
+      </button>
+    </div>
+  </nav>
 
-    <div id="grid-a" class="grid grid-cols-2 gap-3 hidden"></div>
-    <div id="grid-b" class="grid grid-cols-2 gap-3 hidden"></div>
-  </main>
+  <!-- ===== SECTION: PROGRAM INFO ===== -->
+  <section id="sec-program" class="px-4 mt-5 space-y-5">
+
+    <div class="glass rounded-2xl p-5">
+      <h2 class="section-header text-lg font-bold text-white mb-4">הנחיות תוכנית</h2>
+      <div class="space-y-3">
+        <div class="flex items-start gap-3">
+          <span class="mt-1 w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </span>
+          <div>
+            <p class="text-white font-semibold text-sm">3 אימונים בשבוע</p>
+            <p class="text-gray-400 text-xs">כל אימון נמשך כשעה</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="mt-1 w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg>
+          </span>
+          <div>
+            <p class="text-white font-semibold text-sm">בונוס: 1-2 אימוני רגליים בשבוע</p>
+            <p class="text-gray-400 text-xs">בימי מנוחה, למי שרוצה</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass rounded-2xl p-5">
+      <h2 class="section-header text-lg font-bold text-white mb-4">לוח אימונים שבועי</h2>
+      <p class="text-xs text-gray-500 mb-2 font-medium">אופציה 1:</p>
+      <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1">
+        <div class="schedule-day schedule-workout"><div class="font-bold">א'</div><div class="text-[10px] mt-0.5">אימון</div></div>
+        <div class="schedule-day schedule-rest"><div class="font-bold">ב'</div><div class="text-[10px] mt-0.5">מנוחה</div></div>
+        <div class="schedule-day schedule-workout"><div class="font-bold">ג'</div><div class="text-[10px] mt-0.5">אימון</div></div>
+        <div class="schedule-day schedule-rest"><div class="font-bold">ד'</div><div class="text-[10px] mt-0.5">מנוחה</div></div>
+        <div class="schedule-day schedule-workout"><div class="font-bold">ה'</div><div class="text-[10px] mt-0.5">אימון</div></div>
+        <div class="schedule-day schedule-rest"><div class="font-bold">ו'</div><div class="text-[10px] mt-0.5">מנוחה</div></div>
+        <div class="schedule-day schedule-rest"><div class="font-bold">ש'</div><div class="text-[10px] mt-0.5">מנוחה</div></div>
+      </div>
+      <p class="text-xs text-gray-500 mb-2 font-medium">אופציה 2:</p>
+      <div class="flex gap-1.5 overflow-x-auto pb-1">
+        <div class="schedule-day schedule-rest"><div class="font-bold">א'</div><div class="text-[10px] mt-0.5">מנוחה</div></div>
+        <div class="schedule-day schedule-workout"><div class="font-bold">ב'</div><div class="text-[10px] mt-0.5">אימון</div></div>
+        <div class="schedule-day schedule-rest"><div class="font-bold">ג'</div><div class="text-[10px] mt-0.5">מנוחה</div></div>
+        <div class="schedule-day schedule-workout"><div class="font-bold">ד'</div><div class="text-[10px] mt-0.5">אימון</div></div>
+        <div class="schedule-day schedule-rest"><div class="font-bold">ה'</div><div class="text-[10px] mt-0.5">מנוחה</div></div>
+        <div class="schedule-day schedule-workout"><div class="font-bold">ו'</div><div class="text-[10px] mt-0.5">אימון</div></div>
+        <div class="schedule-day schedule-rest"><div class="font-bold">ש'</div><div class="text-[10px] mt-0.5">מנוחה</div></div>
+      </div>
+    </div>
+
+    <div class="glass rounded-2xl p-5">
+      <h2 class="section-header text-lg font-bold text-white mb-4">טבלת חזרות</h2>
+      <p class="text-xs text-gray-400 mb-3">מתח, מקבילים ולחיצת פייק</p>
+      <div class="space-y-2">
+        <div class="flex items-center gap-3 bg-dark-500 rounded-xl p-3">
+          <div class="flex-1">
+            <p class="text-xs text-gray-400">המקסימום שלך</p>
+            <p class="text-white font-bold">6-11 חזרות</p>
+          </div>
+          <svg class="w-5 h-5 text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+          <div class="flex-1 text-left">
+            <p class="text-xs text-gray-400">בצע</p>
+            <p class="text-accent font-bold">4-9 חזרות</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 bg-dark-500 rounded-xl p-3">
+          <div class="flex-1">
+            <p class="text-xs text-gray-400">המקסימום שלך</p>
+            <p class="text-white font-bold">12-16 חזרות</p>
+          </div>
+          <svg class="w-5 h-5 text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+          <div class="flex-1 text-left">
+            <p class="text-xs text-gray-400">בצע</p>
+            <p class="text-accent font-bold">10-14 חזרות</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION: WORKOUT ===== -->
+  <section id="sec-workout" class="px-4 mt-5 space-y-4 hidden">
+
+    <!-- Warm-up -->
+    <div class="glass rounded-2xl p-4 border-r-4 border-yellow-500/60">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-yellow-500/15 flex items-center justify-center">
+          <svg class="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/><path stroke-linecap="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/></svg>
+        </div>
+        <div>
+          <p class="text-yellow-400 text-xs font-medium">חימום</p>
+          <p class="text-white font-bold">חימום פלג גוף עליון</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercise 1: Frog Stand -->
+    <a href="https://www.youtube.com/watch?v=F0S1_WvG80c" target="_blank" rel="noopener noreferrer" class="exercise-card glass rounded-2xl p-4 block no-underline">
+      <div class="flex items-center gap-4">
+        <svg viewBox="0 0 80 80" class="exercise-svg" fill="none">
+          <circle cx="40" cy="18" r="6" fill="#26C6DA"/>
+          <line x1="40" y1="24" x2="40" y2="38" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
+          <line x1="36" y1="28" x2="26" y2="46" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
+          <line x1="44" y1="28" x2="54" y2="46" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
+          <line x1="40" y1="38" x2="30" y2="34" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
+          <line x1="40" y1="38" x2="50" y2="34" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="26" cy="46" r="3" fill="#26C6DA"/>
+          <circle cx="54" cy="46" r="3" fill="#26C6DA"/>
+          <line x1="8" y1="50" x2="72" y2="50" stroke="#333" stroke-width="1.5"/>
+        </svg>
+        <div class="flex-1">
+          <p class="text-white font-bold text-base">עמידת צפרדע (Frog Stand)</p>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">סטים: 3</span>
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">עד 20 שניות</span>
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">מנוחה: 1.5 דק'</span>
+          </div>
+          <div class="mt-2">
+            <span class="video-btn text-xs">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><polygon fill="#fff" points="9.545,15.568 15.818,12 9.545,8.432"/></svg>
+              צפה בסרטון
+            </span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- SUPERSET 1: Dips + Sphinx -->
+    <div class="relative">
+      <div class="absolute top-0 bottom-0 right-2 w-1 rounded-full bg-superset/40"></div>
+      <div class="text-center mb-2">
+        <span class="inline-block bg-superset/15 text-superset text-xs font-bold px-4 py-1.5 rounded-full border border-superset/30">SUPERSET</span>
+      </div>
+      <div class="space-y-2 pr-5">
+        <a href="https://www.youtube.com/watch?v=2Tz7LpA3PzY" target="_blank" rel="noopener noreferrer" class="exercise-card glass rounded-2xl p-4 block no-underline">
+          <div class="flex items-center gap-4">
+            <svg viewBox="0 0 80 80" class="exercise-svg" fill="none">
+              <rect x="8" y="28" width="24" height="4" rx="2" fill="#555"/>
+              <rect x="48" y="28" width="24" height="4" rx="2" fill="#555"/>
+              <rect x="8" y="28" width="4" height="20" rx="1" fill="#666"/>
+              <rect x="68" y="28" width="4" height="20" rx="1" fill="#666"/>
+              <circle cx="40" cy="18" r="6" fill="#FF7043"/>
+              <line x1="34" y1="22" x2="28" y2="30" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+              <line x1="46" y1="22" x2="52" y2="30" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+              <line x1="40" y1="24" x2="40" y2="46" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+              <line x1="40" y1="46" x2="36" y2="64" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+              <line x1="40" y1="46" x2="44" y2="64" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <div class="flex-1">
+              <p class="text-white font-bold">מקבילים (Dips)</p>
+              <p class="text-xs text-gray-400 mt-1">חזרות: לפי הטבלה</p>
+              <span class="video-btn text-xs mt-2">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><polygon fill="#fff" points="9.545,15.568 15.818,12 9.545,8.432"/></svg>
+                צפה בסרטון
+              </span>
+            </div>
+          </div>
+        </a>
+        <a href="https://www.youtube.com/watch?v=Xz7K6K6u5r8" target="_blank" rel="noopener noreferrer" class="exercise-card glass rounded-2xl p-4 block no-underline">
+          <div class="flex items-center gap-4">
+            <svg viewBox="0 0 80 80" class="exercise-svg" fill="none">
+              <circle cx="62" cy="26" r="5" fill="#AB47BC"/>
+              <line x1="58" y1="30" x2="28" y2="38" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
+              <line x1="54" y1="32" x2="48" y2="46" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
+              <line x1="48" y1="46" x2="54" y2="50" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
+              <line x1="28" y1="38" x2="18" y2="46" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
+              <line x1="18" y1="46" x2="12" y2="50" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
+              <line x1="6" y1="52" x2="74" y2="52" stroke="#333" stroke-width="1.5"/>
+            </svg>
+            <div class="flex-1">
+              <p class="text-white font-bold">שכיבות סמיכה ספינקס</p>
+              <p class="text-xs text-gray-400 mt-1">חזרות: 12-16</p>
+              <span class="video-btn text-xs mt-2">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><polygon fill="#fff" points="9.545,15.568 15.818,12 9.545,8.432"/></svg>
+                צפה בסרטון
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="flex flex-wrap gap-2 mt-2 pr-5">
+        <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">סטים: 3</span>
+        <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">מנוחה: 2.5 דק'</span>
+      </div>
+    </div>
+
+    <!-- Exercise: Pull-ups -->
+    <a href="https://www.youtube.com/watch?v=RoxKbyst0To" target="_blank" rel="noopener noreferrer" class="exercise-card glass rounded-2xl p-4 block no-underline">
+      <div class="flex items-center gap-4">
+        <svg viewBox="0 0 80 80" class="exercise-svg" fill="none">
+          <rect x="10" y="6" width="60" height="4" rx="2" fill="#555"/>
+          <rect x="12" y="2" width="4" height="8" rx="1" fill="#666"/>
+          <rect x="64" y="2" width="4" height="8" rx="1" fill="#666"/>
+          <circle cx="40" cy="20" r="6" fill="#4FC3F7"/>
+          <line x1="34" y1="18" x2="26" y2="10" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+          <line x1="46" y1="18" x2="54" y2="10" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+          <line x1="40" y1="26" x2="40" y2="46" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+          <line x1="40" y1="46" x2="34" y2="64" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+          <line x1="40" y1="46" x2="46" y2="64" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div class="flex-1">
+          <p class="text-white font-bold text-base">מתח (Pull-ups)</p>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">סטים: 3</span>
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">חזרות: לפי הטבלה</span>
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">מנוחה: 2.5 דק'</span>
+          </div>
+          <div class="mt-2">
+            <span class="video-btn text-xs">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><polygon fill="#fff" points="9.545,15.568 15.818,12 9.545,8.432"/></svg>
+              צפה בסרטון
+            </span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- SUPERSET 2: 90° Hold + Bicep Curls -->
+    <div class="relative">
+      <div class="absolute top-0 bottom-0 right-2 w-1 rounded-full bg-superset/40"></div>
+      <div class="text-center mb-2">
+        <span class="inline-block bg-superset/15 text-superset text-xs font-bold px-4 py-1.5 rounded-full border border-superset/30">SUPERSET</span>
+      </div>
+      <div class="space-y-2 pr-5">
+        <a href="https://www.youtube.com/watch?v=ZfX_E4lYjB0" target="_blank" rel="noopener noreferrer" class="exercise-card glass rounded-2xl p-4 block no-underline">
+          <div class="flex items-center gap-4">
+            <svg viewBox="0 0 80 80" class="exercise-svg" fill="none">
+              <rect x="10" y="6" width="60" height="4" rx="2" fill="#555"/>
+              <rect x="12" y="2" width="4" height="8" rx="1" fill="#666"/>
+              <rect x="64" y="2" width="4" height="8" rx="1" fill="#666"/>
+              <circle cx="40" cy="20" r="6" fill="#FFA726"/>
+              <line x1="34" y1="18" x2="28" y2="10" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
+              <line x1="46" y1="18" x2="52" y2="10" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
+              <line x1="40" y1="26" x2="40" y2="42" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
+              <line x1="40" y1="42" x2="34" y2="60" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
+              <line x1="40" y1="42" x2="46" y2="60" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
+              <text x="56" y="28" fill="#FFA726" font-size="10" font-weight="bold">90°</text>
+            </svg>
+            <div class="flex-1">
+              <p class="text-white font-bold">אחיזת מתח 90° (כפות הפוכות)</p>
+              <p class="text-xs text-gray-400 mt-1">20 שניות</p>
+              <span class="video-btn text-xs mt-2">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><polygon fill="#fff" points="9.545,15.568 15.818,12 9.545,8.432"/></svg>
+                צפה בסרטון
+              </span>
+            </div>
+          </div>
+        </a>
+        <a href="https://www.youtube.com/watch?v=R9YqNf4F0Gk" target="_blank" rel="noopener noreferrer" class="exercise-card glass rounded-2xl p-4 block no-underline">
+          <div class="flex items-center gap-4">
+            <svg viewBox="0 0 80 80" class="exercise-svg" fill="none">
+              <rect x="10" y="6" width="60" height="4" rx="2" fill="#555"/>
+              <circle cx="40" cy="16" r="5" fill="#66BB6A"/>
+              <line x1="36" y1="18" x2="32" y2="10" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
+              <line x1="44" y1="18" x2="48" y2="10" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
+              <line x1="40" y1="21" x2="40" y2="44" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
+              <line x1="40" y1="44" x2="34" y2="64" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
+              <line x1="40" y1="44" x2="46" y2="64" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="32" cy="10" r="2" fill="#66BB6A"/>
+              <circle cx="48" cy="10" r="2" fill="#66BB6A"/>
+            </svg>
+            <div class="flex-1">
+              <p class="text-white font-bold">כפיפות יד על המתח (Bicep Curls)</p>
+              <p class="text-xs text-gray-400 mt-1">חזרות: 12-16</p>
+              <span class="video-btn text-xs mt-2">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><polygon fill="#fff" points="9.545,15.568 15.818,12 9.545,8.432"/></svg>
+                צפה בסרטון
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="flex flex-wrap gap-2 mt-2 pr-5">
+        <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">סטים: 3</span>
+        <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">מנוחה: 2 דק'</span>
+      </div>
+    </div>
+
+    <!-- Exercise: Wide Rest-Pause Push-ups -->
+    <a href="https://www.youtube.com/watch?v=7_hKj8Nf-vE" target="_blank" rel="noopener noreferrer" class="exercise-card glass rounded-2xl p-4 block no-underline">
+      <div class="flex items-center gap-4">
+        <svg viewBox="0 0 80 80" class="exercise-svg" fill="none">
+          <circle cx="64" cy="26" r="5" fill="#42A5F5"/>
+          <line x1="60" y1="30" x2="22" y2="34" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
+          <line x1="56" y1="30" x2="64" y2="46" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
+          <line x1="34" y1="32" x2="26" y2="46" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
+          <line x1="22" y1="34" x2="14" y2="44" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
+          <line x1="14" y1="44" x2="10" y2="46" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
+          <line x1="6" y1="48" x2="74" y2="48" stroke="#333" stroke-width="1.5"/>
+        </svg>
+        <div class="flex-1">
+          <p class="text-white font-bold text-base">שכיבות סמיכה רחב (Rest-Pause)</p>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">סט: 1</span>
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">חזרות: מקסימום</span>
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">מנוחה: 10 שניות</span>
+          </div>
+          <div class="mt-2">
+            <span class="video-btn text-xs">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><polygon fill="#fff" points="9.545,15.568 15.818,12 9.545,8.432"/></svg>
+              צפה בסרטון
+            </span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Bonus Exercise -->
+    <div class="glass rounded-2xl p-4 border-r-4 border-accent/60">
+      <div class="flex items-center gap-4">
+        <svg viewBox="0 0 80 80" class="exercise-svg" fill="none">
+          <rect x="8" y="28" width="24" height="4" rx="2" fill="#555"/>
+          <rect x="48" y="28" width="24" height="4" rx="2" fill="#555"/>
+          <rect x="8" y="28" width="4" height="20" rx="1" fill="#666"/>
+          <rect x="68" y="28" width="4" height="20" rx="1" fill="#666"/>
+          <circle cx="35" cy="18" r="5" fill="#EF5350"/>
+          <line x1="31" y1="22" x2="24" y2="30" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
+          <line x1="39" y1="22" x2="46" y2="30" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
+          <line x1="35" y1="23" x2="35" y2="44" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
+          <line x1="35" y1="44" x2="30" y2="60" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
+          <line x1="35" y1="44" x2="40" y2="60" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
+          <path d="M50 20 L58 20" stroke="#EF5350" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 3"/>
+        </svg>
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-[10px] bg-accent/15 text-accent px-2 py-0.5 rounded-md font-bold">בונוס</span>
+          </div>
+          <p class="text-white font-bold">הליכה על מקבילים עם שכיבות סמיכה</p>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">סטים: 2</span>
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">חזרות: מקסימום</span>
+            <span class="text-[11px] bg-dark-400 text-gray-300 px-2 py-0.5 rounded-md">מנוחה: 2 דק'</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===== SECTION: TRANSITION CHALLENGE ===== -->
+  <section id="sec-challenge" class="px-4 mt-5 space-y-5 hidden">
+
+    <div class="glass rounded-2xl p-5">
+      <h2 class="section-header text-lg font-bold text-white mb-3">מהו אתגר מעבר?</h2>
+      <p class="text-sm text-gray-300 leading-relaxed">
+        אתגר מעבר הוא אתגר שעליך להשלים כדי לעלות לרמה הבאה בשלב היסודות. שלח את הסרטון למאמן המלווה שלך, והוא יבדוק אם אתה מוכן לעבור לרמה הבאה.
+      </p>
+    </div>
+
+    <div class="glass rounded-2xl p-5">
+      <h2 class="section-header text-lg font-bold text-white mb-4">תנאים לביצוע האתגר</h2>
+      <div class="space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <p class="text-sm text-gray-300">ביצוע האתגר עם טכניקה נקייה ותנועה מלאה</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <p class="text-sm text-gray-300">ביצוע הכל ברצף ללא מנוחה ארוכה</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <p class="text-sm text-gray-300">צילום הסרטון בצורה ברורה ללא חיתוכים</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <p class="text-sm text-gray-300">מומלץ לקחת יומיים מנוחה לפני ניסיון האתגר</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass rounded-2xl p-5">
+      <h2 class="section-header text-lg font-bold text-white mb-5">יעד האתגר</h2>
+      <div class="challenge-flow">
+        <div class="challenge-item border border-[#26C6DA]/30 text-[#26C6DA]">
+          <div class="text-lg">15 שנ'</div>
+          <div class="text-[10px] text-gray-400">עמידת צפרדע</div>
+        </div>
+        <span class="challenge-arrow">&#10132;</span>
+        <div class="challenge-item border border-[#4FC3F7]/30 text-[#4FC3F7]">
+          <div class="text-lg">12</div>
+          <div class="text-[10px] text-gray-400">מתח</div>
+        </div>
+        <span class="challenge-arrow">&#10132;</span>
+        <div class="challenge-item border border-[#FF7043]/30 text-[#FF7043]">
+          <div class="text-lg">12</div>
+          <div class="text-[10px] text-gray-400">מקבילים</div>
+        </div>
+        <span class="challenge-arrow">&#10132;</span>
+        <div class="challenge-item border border-[#42A5F5]/30 text-[#42A5F5]">
+          <div class="text-lg">12</div>
+          <div class="text-[10px] text-gray-400">שכיבות סמיכה</div>
+        </div>
+        <span class="challenge-arrow">&#10132;</span>
+        <div class="challenge-item border border-[#AB47BC]/30 text-[#AB47BC]">
+          <div class="text-lg">15</div>
+          <div class="text-[10px] text-gray-400">מתח אוסטרלי</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <script>
-    // SVG illustrations matching the infographic poses
-
-    const svgPullUp = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Bar -->
-      <rect x="10" y="8" width="60" height="4" rx="2" fill="#555"/>
-      <rect x="12" y="4" width="4" height="8" rx="1" fill="#666"/>
-      <rect x="64" y="4" width="4" height="8" rx="1" fill="#666"/>
-      <!-- Person hanging and pulling up -->
-      <circle cx="40" cy="22" r="6" fill="#4FC3F7"/>
-      <!-- Arms reaching up to bar -->
-      <line x1="34" y1="20" x2="26" y2="12" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
-      <line x1="46" y1="20" x2="54" y2="12" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
-      <!-- Torso -->
-      <line x1="40" y1="28" x2="40" y2="48" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs straight -->
-      <line x1="40" y1="48" x2="34" y2="66" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
-      <line x1="40" y1="48" x2="46" y2="66" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
-    </svg>`;
-
-    const svgDips = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Parallel bars -->
-      <rect x="8" y="30" width="24" height="4" rx="2" fill="#555"/>
-      <rect x="48" y="30" width="24" height="4" rx="2" fill="#555"/>
-      <rect x="8" y="30" width="4" height="20" rx="1" fill="#666"/>
-      <rect x="68" y="30" width="4" height="20" rx="1" fill="#666"/>
-      <!-- Person between bars, arms extended -->
-      <circle cx="40" cy="20" r="6" fill="#FF7043"/>
-      <!-- Arms on bars -->
-      <line x1="34" y1="24" x2="28" y2="32" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <line x1="46" y1="24" x2="52" y2="32" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <!-- Torso -->
-      <line x1="40" y1="26" x2="40" y2="48" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs hanging, slightly forward -->
-      <line x1="40" y1="48" x2="36" y2="66" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <line x1="40" y1="48" x2="44" y2="66" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-    </svg>`;
-
-    const svgSphinx = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Person in sphinx push-up: forearms on ground, pushing up -->
-      <circle cx="62" cy="30" r="5" fill="#AB47BC"/>
-      <!-- Back/torso angled -->
-      <line x1="58" y1="34" x2="30" y2="42" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
-      <!-- Forearms on ground -->
-      <line x1="56" y1="36" x2="50" y2="50" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
-      <line x1="50" y1="50" x2="56" y2="54" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs extended back -->
-      <line x1="30" y1="42" x2="20" y2="50" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
-      <line x1="20" y1="50" x2="12" y2="54" stroke="#AB47BC" stroke-width="3" stroke-linecap="round"/>
-      <!-- Ground line -->
-      <line x1="6" y1="56" x2="74" y2="56" stroke="#333" stroke-width="1.5"/>
-    </svg>`;
-
-    const svg90Hold = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Bar -->
-      <rect x="10" y="8" width="60" height="4" rx="2" fill="#555"/>
-      <rect x="12" y="4" width="4" height="8" rx="1" fill="#666"/>
-      <rect x="64" y="4" width="4" height="8" rx="1" fill="#666"/>
-      <!-- Person holding at 90 degrees -->
-      <circle cx="40" cy="22" r="6" fill="#FFA726"/>
-      <!-- Arms bent at 90° on bar -->
-      <line x1="34" y1="20" x2="28" y2="12" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
-      <line x1="46" y1="20" x2="52" y2="12" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
-      <!-- Torso -->
-      <line x1="40" y1="28" x2="40" y2="44" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs straight -->
-      <line x1="40" y1="44" x2="34" y2="62" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
-      <line x1="40" y1="44" x2="46" y2="62" stroke="#FFA726" stroke-width="3" stroke-linecap="round"/>
-      <!-- 90° indicator -->
-      <text x="58" y="26" fill="#FFA726" font-size="10" font-weight="bold">90°</text>
-    </svg>`;
-
-    const svgChinUp = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Bar -->
-      <rect x="10" y="8" width="60" height="4" rx="2" fill="#555"/>
-      <rect x="12" y="4" width="4" height="8" rx="1" fill="#666"/>
-      <rect x="64" y="4" width="4" height="8" rx="1" fill="#666"/>
-      <!-- Person chin above bar (supinated grip) -->
-      <circle cx="40" cy="16" r="5" fill="#66BB6A"/>
-      <!-- Arms gripping bar (closer grip, palms facing) -->
-      <line x1="36" y1="18" x2="32" y2="12" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
-      <line x1="44" y1="18" x2="48" y2="12" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
-      <!-- Torso -->
-      <line x1="40" y1="21" x2="40" y2="44" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs -->
-      <line x1="40" y1="44" x2="34" y2="64" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
-      <line x1="40" y1="44" x2="46" y2="64" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/>
-      <!-- Underhand grip indicators -->
-      <circle cx="32" cy="12" r="2" fill="#66BB6A"/>
-      <circle cx="48" cy="12" r="2" fill="#66BB6A"/>
-    </svg>`;
-
-    const svgWidePushUp = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Person in wide push-up position -->
-      <circle cx="64" cy="28" r="5" fill="#42A5F5"/>
-      <!-- Torso horizontal -->
-      <line x1="60" y1="32" x2="22" y2="36" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
-      <!-- Arms wide apart, hands on ground -->
-      <line x1="56" y1="32" x2="62" y2="48" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
-      <line x1="36" y1="34" x2="30" y2="48" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs -->
-      <line x1="22" y1="36" x2="16" y2="46" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
-      <line x1="16" y1="46" x2="12" y2="48" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/>
-      <!-- Ground line -->
-      <line x1="6" y1="50" x2="74" y2="50" stroke="#333" stroke-width="1.5"/>
-    </svg>`;
-
-    const svgFrogStand = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Person in frog stand: hands on ground, knees on elbows, balanced -->
-      <circle cx="40" cy="22" r="5" fill="#26C6DA"/>
-      <!-- Torso tilted forward -->
-      <line x1="40" y1="27" x2="40" y2="40" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
-      <!-- Arms straight down to ground -->
-      <line x1="36" y1="30" x2="28" y2="48" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
-      <line x1="44" y1="30" x2="52" y2="48" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
-      <!-- Knees tucked up on elbows -->
-      <line x1="40" y1="40" x2="32" y2="36" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
-      <line x1="40" y1="40" x2="48" y2="36" stroke="#26C6DA" stroke-width="3" stroke-linecap="round"/>
-      <!-- Hands on ground -->
-      <circle cx="28" cy="48" r="2.5" fill="#26C6DA"/>
-      <circle cx="52" cy="48" r="2.5" fill="#26C6DA"/>
-      <!-- Ground line -->
-      <line x1="6" y1="52" x2="74" y2="52" stroke="#333" stroke-width="1.5"/>
-    </svg>`;
-
-    const svgLowDips = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Low parallel bars / bench dips -->
-      <rect x="10" y="42" width="60" height="3" rx="1.5" fill="#555"/>
-      <rect x="12" y="42" width="3" height="14" rx="1" fill="#666"/>
-      <rect x="65" y="42" width="3" height="14" rx="1" fill="#666"/>
-      <!-- Person dipping down between low bars -->
-      <circle cx="40" cy="26" r="5" fill="#EF5350"/>
-      <!-- Arms on bars -->
-      <line x1="34" y1="30" x2="24" y2="44" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
-      <line x1="46" y1="30" x2="56" y2="44" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
-      <!-- Torso going down -->
-      <line x1="40" y1="31" x2="40" y2="50" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs forward -->
-      <line x1="40" y1="50" x2="34" y2="64" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
-      <line x1="40" y1="50" x2="46" y2="64" stroke="#EF5350" stroke-width="3" stroke-linecap="round"/>
-    </svg>`;
-
-    // === Workout B SVGs ===
-
-    const svgSquat = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Person in squat position -->
-      <circle cx="40" cy="16" r="6" fill="#FF7043"/>
-      <!-- Torso upright -->
-      <line x1="40" y1="22" x2="40" y2="40" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <!-- Arms forward for balance -->
-      <line x1="36" y1="28" x2="24" y2="30" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <line x1="44" y1="28" x2="56" y2="30" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs bent in squat -->
-      <line x1="40" y1="40" x2="30" y2="50" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <line x1="30" y1="50" x2="28" y2="62" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <line x1="40" y1="40" x2="50" y2="50" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <line x1="50" y1="50" x2="52" y2="62" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>
-      <!-- Ground -->
-      <line x1="10" y1="64" x2="70" y2="64" stroke="#333" stroke-width="1.5"/>
-    </svg>`;
-
-    const svgLegRaiseLying = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Person lying on back, raising legs -->
-      <circle cx="16" cy="42" r="5" fill="#FFD54F"/>
-      <!-- Torso lying flat -->
-      <line x1="21" y1="44" x2="44" y2="44" stroke="#FFD54F" stroke-width="3" stroke-linecap="round"/>
-      <!-- Arms on ground -->
-      <line x1="24" y1="44" x2="20" y2="50" stroke="#FFD54F" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="30" y1="44" x2="26" y2="50" stroke="#FFD54F" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- Legs raised at angle -->
-      <line x1="44" y1="44" x2="58" y2="22" stroke="#FFD54F" stroke-width="3" stroke-linecap="round"/>
-      <line x1="44" y1="44" x2="62" y2="24" stroke="#FFD54F" stroke-width="3" stroke-linecap="round"/>
-      <!-- Ground line -->
-      <line x1="6" y1="52" x2="74" y2="52" stroke="#333" stroke-width="1.5"/>
-    </svg>`;
-
-    const svgHangingLegRaise = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Bar -->
-      <rect x="10" y="6" width="60" height="4" rx="2" fill="#555"/>
-      <!-- Person hanging, legs raised forward -->
-      <circle cx="40" cy="18" r="5" fill="#CE93D8"/>
-      <!-- Arms up to bar -->
-      <line x1="36" y1="16" x2="30" y2="10" stroke="#CE93D8" stroke-width="3" stroke-linecap="round"/>
-      <line x1="44" y1="16" x2="50" y2="10" stroke="#CE93D8" stroke-width="3" stroke-linecap="round"/>
-      <!-- Torso -->
-      <line x1="40" y1="23" x2="40" y2="44" stroke="#CE93D8" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs raised forward (L-shape) -->
-      <line x1="40" y1="44" x2="28" y2="46" stroke="#CE93D8" stroke-width="3" stroke-linecap="round"/>
-      <line x1="40" y1="44" x2="26" y2="50" stroke="#CE93D8" stroke-width="3" stroke-linecap="round"/>
-    </svg>`;
-
-    const svgBridge = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Person in glute bridge: back arched, hips up -->
-      <!-- Head on ground -->
-      <circle cx="16" cy="40" r="5" fill="#4DB6AC"/>
-      <!-- Upper back on ground, hips raised -->
-      <line x1="21" y1="42" x2="30" y2="40" stroke="#4DB6AC" stroke-width="3" stroke-linecap="round"/>
-      <line x1="30" y1="40" x2="44" y2="28" stroke="#4DB6AC" stroke-width="3" stroke-linecap="round"/>
-      <line x1="44" y1="28" x2="52" y2="36" stroke="#4DB6AC" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs bent, feet on ground -->
-      <line x1="52" y1="36" x2="56" y2="48" stroke="#4DB6AC" stroke-width="3" stroke-linecap="round"/>
-      <!-- Arms flat on ground -->
-      <line x1="24" y1="42" x2="22" y2="50" stroke="#4DB6AC" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- Ground line -->
-      <line x1="6" y1="50" x2="74" y2="50" stroke="#333" stroke-width="1.5"/>
-    </svg>`;
-
-    const svgPlank = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Person in extended plank position -->
-      <circle cx="64" cy="30" r="5" fill="#7986CB"/>
-      <!-- Torso straight and horizontal -->
-      <line x1="60" y1="34" x2="20" y2="38" stroke="#7986CB" stroke-width="3" stroke-linecap="round"/>
-      <!-- Arms straight down -->
-      <line x1="56" y1="34" x2="56" y2="50" stroke="#7986CB" stroke-width="3" stroke-linecap="round"/>
-      <!-- Legs extended, toes on ground -->
-      <line x1="20" y1="38" x2="12" y2="50" stroke="#7986CB" stroke-width="3" stroke-linecap="round"/>
-      <!-- Ground line -->
-      <line x1="6" y1="52" x2="74" y2="52" stroke="#333" stroke-width="1.5"/>
-    </svg>`;
-
-    const svgLunge = `<svg viewBox="0 0 80 80" class="exercise-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Person in lunge / cossack squat -->
-      <circle cx="40" cy="14" r="6" fill="#AED581"/>
-      <!-- Torso upright -->
-      <line x1="40" y1="20" x2="40" y2="38" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
-      <!-- Arms on hips -->
-      <line x1="36" y1="26" x2="30" y2="32" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
-      <line x1="44" y1="26" x2="50" y2="32" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
-      <!-- Front leg bent -->
-      <line x1="40" y1="38" x2="30" y2="50" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
-      <line x1="30" y1="50" x2="28" y2="62" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
-      <!-- Back leg extended -->
-      <line x1="40" y1="38" x2="54" y2="48" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
-      <line x1="54" y1="48" x2="64" y2="52" stroke="#AED581" stroke-width="3" stroke-linecap="round"/>
-      <!-- Ground -->
-      <line x1="10" y1="64" x2="70" y2="64" stroke="#333" stroke-width="1.5"/>
-    </svg>`;
-
-    const workoutA = [
-      { name: "עליות מתח (טכניקה)", url: "https://www.youtube.com/watch?v=RoxKbyst0To", svg: svgPullUp },
-      { name: "מקבילים (Dips)", url: "https://www.youtube.com/watch?v=2Tz7LpA3PzY", svg: svgDips },
-      { name: "שכיבות סמיכה ספינקס (יד אחורית)", url: "https://www.youtube.com/watch?v=Xz7K6K6u5r8", svg: svgSphinx },
-      { name: "איך לעשות יותר מתח (מתקדם)", url: "https://www.youtube.com/watch?v=ZfX_E4lYjB0", svg: svg90Hold },
-      { name: "יד קדמית על המתח", url: "https://www.youtube.com/watch?v=R9YqNf4F0Gk", svg: svgChinUp },
-      { name: "וריאציות שכיבות סמיכה", url: "https://www.youtube.com/watch?v=7_hKj8Nf-vE", svg: svgWidePushUp },
-      { name: "עמידת צפרדע (Frog Stand)", url: "https://www.youtube.com/watch?v=F0S1_WvG80c", svg: svgFrogStand },
-      { name: "חזה וכתפיים (מקבילים נמוכים)", url: "https://www.youtube.com/watch?v=vV_n3JmS_oU", svg: svgLowDips },
-    ];
-
-    const workoutB = [
-      { name: "אימון רגליים מלא (15 דקות)", url: "https://www.youtube.com/watch?v=svoaqltrANc", svg: svgSquat },
-      { name: "אימון בטן מתקדם (15 דקות)", url: "https://www.youtube.com/watch?v=u5M011lRLak", svg: svgLegRaiseLying },
-      { name: "הרמות רגליים (Leg Raises)", url: "https://youtube.com/shorts/VFjA6-65b2c", svg: svgHangingLegRaise },
-      { name: "גשר (Glute Bridge)", url: "https://youtube.com/shorts/X_IGw8U_e38", svg: svgBridge },
-      { name: "יסודות ליבה ופלאנק", url: "https://www.youtube.com/watch?v=axnHz5iPYCk", svg: svgPlank },
-      { name: "תרגילי רגליים וסקוואט", url: "https://www.youtube.com/watch?v=9K9lTOQ8uEM", svg: svgLunge },
-    ];
-
-    function createCard(exercise) {
-      return `
-        <a href="${exercise.url}" target="_blank" rel="noopener noreferrer"
-           class="card rounded-2xl p-4 flex flex-col items-center justify-center gap-2 text-center min-h-[160px] no-underline">
-          ${exercise.svg}
-          <span class="text-sm font-medium leading-tight text-gray-200">${exercise.name}</span>
-        </a>
-      `;
+    function showSection(id) {
+      ['program', 'workout', 'challenge'].forEach(s => {
+        document.getElementById('sec-' + s).classList.toggle('hidden', s !== id);
+        const btn = document.getElementById('nav-' + s);
+        if (s === id) {
+          btn.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-accent text-dark-900';
+        } else {
+          btn.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-dark-400 text-gray-400';
+        }
+      });
+      localStorage.setItem('lastSection', id);
     }
 
-    function renderCards() {
-      document.getElementById('grid-a').innerHTML = workoutA.map(createCard).join('');
-      document.getElementById('grid-b').innerHTML = workoutB.map(createCard).join('');
-    }
-
-    function switchTab(tab) {
-      const isA = tab === 'a';
-
-      document.getElementById('tab-a').className = `flex-1 py-3 rounded-xl text-lg transition-colors duration-200 ${isA ? 'tab-active' : 'tab-inactive'}`;
-      document.getElementById('tab-b').className = `flex-1 py-3 rounded-xl text-lg transition-colors duration-200 ${isA ? 'tab-inactive' : 'tab-active'}`;
-
-      document.getElementById('grid-a').classList.toggle('hidden', !isA);
-      document.getElementById('grid-b').classList.toggle('hidden', isA);
-      document.getElementById('subtitle-a').classList.toggle('hidden', !isA);
-      document.getElementById('subtitle-b').classList.toggle('hidden', isA);
-
-      localStorage.setItem('lastWorkout', tab);
-    }
-
-    // Init
-    renderCards();
-    const lastTab = localStorage.getItem('lastWorkout') || 'a';
-    switchTab(lastTab);
+    const last = localStorage.getItem('lastSection') || 'program';
+    showSection(last);
   </script>
 </body>
 </html>
