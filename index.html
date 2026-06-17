@@ -83,9 +83,61 @@
     .ch-arrow { color: #444; font-size: 0.9rem; }
 
     .tip { font-size: 0.75rem; color: #666; text-align: center; margin-top: 6px; line-height: 1.5; }
+
+    /* Floating "Save as PDF" button */
+    .pdf-btn {
+      position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+      z-index: 50; display: inline-flex; align-items: center; gap: 8px;
+      background: #00e676; color: #0d0d0d; font-weight: 800; font-size: 0.9rem;
+      border: none; border-radius: 999px; padding: 12px 22px; cursor: pointer;
+      box-shadow: 0 6px 24px rgba(0,230,118,0.35); font-family: inherit;
+    }
+    .pdf-btn svg { width: 18px; height: 18px; }
+    .pdf-btn:active { transform: translateX(-50%) scale(0.96); }
+
+    /* ===== PRINT / PDF (light theme) ===== */
+    @media print {
+      @page { size: A4; margin: 14mm; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { background: #fff !important; color: #1a1a1a !important; padding: 0 !important; }
+      .pdf-btn { display: none !important; }
+
+      header { padding: 0 0 14px !important; }
+      header h1 { color: #111 !important; }
+      header p { color: #00a152 !important; }
+
+      .exercise {
+        background: #fff !important; border: 1px solid #ddd !important;
+        break-inside: avoid; page-break-inside: avoid; padding: 10px 12px !important;
+      }
+      .icon-wrap { background: #f1f1f1 !important; }
+      .ex-name { color: #111 !important; }
+      .ex-details { color: #555 !important; }
+      .superset-label { color: #d35400 !important; break-after: avoid; }
+
+      .divider { background: #ccc !important; }
+      .info-title { color: #111 !important; }
+      .info-section, .challenge-box { break-inside: avoid; page-break-inside: avoid; }
+      .info-section > div[style] { background: #f7f7f7 !important; color: #333 !important; border: 1px solid #e2e2e2; }
+
+      .day-off { background: #f1f1f1 !important; color: #888 !important; }
+      .day-on { background: #e3fbed !important; color: #00a152 !important; border-color: #00a152 !important; }
+
+      .challenge-box { background: #f7f7f7 !important; border: 1px solid #e2e2e2; }
+      .ch-item { background: #fff !important; border: 1px solid #ddd; }
+      .ch-item .num { color: #00a152 !important; }
+      .ch-item .label, .tip { color: #666 !important; }
+      .ch-arrow { color: #bbb !important; }
+      .yt-badge { background: #ffe3e3 !important; }
+    }
   </style>
 </head>
 <body>
+
+  <button class="pdf-btn" onclick="window.print()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    שמור כ-PDF
+  </button>
 
   <header>
     <h1>תוכנית קליסטניקס</h1>
