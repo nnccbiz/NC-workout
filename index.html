@@ -95,40 +95,49 @@
     .pdf-btn svg { width: 18px; height: 18px; }
     .pdf-btn:active { transform: translateX(-50%) scale(0.96); }
 
-    /* ===== PRINT / PDF (light theme) ===== */
+    /* ===== PRINT / PDF (light theme, exactly 2 pages) ===== */
     @media print {
-      @page { size: A4; margin: 14mm; }
+      @page { size: A4; margin: 11mm; }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       body { background: #fff !important; color: #1a1a1a !important; padding: 0 !important; }
       .pdf-btn { display: none !important; }
 
-      header { padding: 0 0 14px !important; }
-      header h1 { color: #111 !important; }
+      header { padding: 0 0 8px !important; }
+      header h1 { color: #111 !important; font-size: 1.5rem !important; }
       header p { color: #00a152 !important; }
+
+      /* PAGE 1 — exercises in two columns (supersets side by side) */
+      .exercises { display: grid !important; grid-template-columns: 1fr 1fr; gap: 7px; }
+      .superset-label { grid-column: 1 / -1; padding: 2px 0 0 !important; font-size: 0.66rem !important; }
 
       .exercise {
         background: #fff !important; border: 1px solid #ddd !important;
-        break-inside: avoid; page-break-inside: avoid; padding: 10px 12px !important;
+        break-inside: avoid; page-break-inside: avoid;
+        padding: 7px 9px !important; gap: 10px !important; border-radius: 12px !important;
       }
-      .icon-wrap { background: #f1f1f1 !important; }
-      .ex-name { color: #111 !important; }
-      .ex-details { color: #555 !important; }
-      .superset-label { color: #d35400 !important; break-after: avoid; }
+      .icon-wrap { width: 46px !important; height: 46px !important; background: #f1f1f1 !important; border-radius: 11px !important; }
+      .icon-wrap svg { width: 34px !important; height: 34px !important; }
+      .ex-name { color: #111 !important; font-size: 0.82rem !important; }
+      .ex-details { color: #555 !important; font-size: 0.62rem !important; gap: 6px !important; margin-top: 3px !important; }
+      .yt-badge { background: #ffe3e3 !important; width: 18px !important; height: 18px !important; }
+      .bonus-tag { font-size: 0.55rem !important; }
 
-      .divider { background: #ccc !important; }
-      .info-title { color: #111 !important; }
-      .info-section, .challenge-box { break-inside: avoid; page-break-inside: avoid; }
+      /* PAGE 2 — guidelines, schedule, challenge */
+      .divider { display: none !important; }
+      .exercises { page-break-after: always; break-after: page; }
+
+      .info-section { margin-bottom: 16px !important; break-inside: avoid; page-break-inside: avoid; }
+      .info-title { color: #111 !important; font-size: 1.05rem !important; }
       .info-section > div[style] { background: #f7f7f7 !important; color: #333 !important; border: 1px solid #e2e2e2; }
 
       .day-off { background: #f1f1f1 !important; color: #888 !important; }
       .day-on { background: #e3fbed !important; color: #00a152 !important; border-color: #00a152 !important; }
 
-      .challenge-box { background: #f7f7f7 !important; border: 1px solid #e2e2e2; }
+      .challenge-box { background: #f7f7f7 !important; border: 1px solid #e2e2e2; break-inside: avoid; }
       .ch-item { background: #fff !important; border: 1px solid #ddd; }
       .ch-item .num { color: #00a152 !important; }
       .ch-item .label, .tip { color: #666 !important; }
       .ch-arrow { color: #bbb !important; }
-      .yt-badge { background: #ffe3e3 !important; }
     }
   </style>
 </head>
