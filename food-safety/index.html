@@ -202,7 +202,7 @@ function nextNum(prefix){
 }
 
 /* ---------- שמירה וטעינה ---------- */
-function save(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){ /* אחסון חסום בדפדפן — העבודה נמשכת בזיכרון בלבד */ } }
 function load(){
   try{
     var raw = localStorage.getItem(KEY);
@@ -1695,10 +1695,25 @@ function saveSettings(){
   refresh(); toast('ההגדרות נשמרו');
 }
 function exportData(){
-  var blob = new Blob([JSON.stringify(DB, null, 2)], { type:'application/json' });
+  var json = JSON.stringify(DB, null, 2);
+  var name = 'food-safety-backup-' + today() + '.json';
+  /* בסביבת דף מתארח ההורדה עוברת דרך שכבת השמירה של המארח; אחרת קישור רגיל */
+  if(typeof claude !== 'undefined' && claude && typeof claude.use === 'function'){
+    claude.use('downloads').then(function(d){
+      if(!d){ downloadFile(json, name); return; }
+      return d.save({ filename:name, data:json }).then(
+        function(){ toast('קובץ הגיבוי נשמר'); },
+        function(err){ toast(err && err.code === 'declined' ? 'השמירה בוטלה' : 'שמירת הגיבוי נכשלה', 'bad'); });
+    }, function(){ downloadFile(json, name); });
+  } else {
+    downloadFile(json, name);
+  }
+}
+function downloadFile(json, name){
+  var blob = new Blob([json], { type:'application/json' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'food-safety-backup-' + today() + '.json';
+  a.download = name;
   a.click();
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
   toast('קובץ הגיבוי נוצר');
