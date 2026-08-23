@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מערכת שליטה לבטיחות מזון</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --bg:#0d0d0d; --card:#1a1a1a; --card2:#252525; --line:#2b2b2b;
+    --txt:#e0e0e0; --muted:#8a8a8a; --white:#fff;
+    --ok:#00e676; --warn:#ffb300; --bad:#ff5252; --info:#40c4ff; --orange:#ff6d00;
+  }
+  body{ font-family:'Heebo',sans-serif; background:var(--bg); color:var(--txt); padding-bottom:40px; }
+
+  header{ padding:16px; background:linear-gradient(180deg,#141414,#0d0d0d); border-bottom:1px solid var(--line); }
+  header h1{ font-size:1.15rem; font-weight:800; color:var(--white); }
+  header p{ font-size:0.72rem; color:var(--ok); font-weight:600; margin-top:2px; }
+
+  nav{ display:flex; gap:6px; overflow-x:auto; padding:10px 12px; border-bottom:1px solid var(--line);
+       background:#111; position:sticky; top:0; z-index:40; scrollbar-width:none; }
+  nav::-webkit-scrollbar{ display:none; }
+  nav button{ flex:0 0 auto; font-family:inherit; font-size:0.75rem; font-weight:700; color:var(--muted);
+      background:var(--card); border:1px solid transparent; border-radius:999px; padding:8px 14px; cursor:pointer; white-space:nowrap; }
+  nav button.active{ background:rgba(0,230,118,0.12); color:var(--ok); border-color:rgba(0,230,118,0.3); }
+  nav button .cnt{ font-size:0.65rem; opacity:0.8; }
+
+  main{ padding:16px 12px 0; max-width:1100px; margin:0 auto; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .section-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+  .section-head h2{ font-size:1rem; color:var(--white); font-weight:800; }
+  .section-head .sub{ font-size:0.7rem; color:var(--muted); font-weight:400; margin-top:2px; }
+
+  button.btn{ font-family:inherit; font-weight:700; font-size:0.78rem; border:none; border-radius:10px;
+      padding:9px 14px; cursor:pointer; background:var(--ok); color:#0d0d0d; }
+  button.btn:active{ transform:scale(0.97); }
+  button.btn.ghost{ background:var(--card2); color:var(--txt); }
+  button.btn.danger{ background:rgba(255,82,82,0.15); color:var(--bad); }
+  button.btn.warn{ background:rgba(255,179,0,0.15); color:var(--warn); }
+  button.btn.info{ background:rgba(64,196,255,0.15); color:var(--info); }
+  button.btn.sm{ font-size:0.7rem; padding:6px 10px; border-radius:8px; }
+  button.btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .card{ background:var(--card); border-radius:14px; padding:14px; margin-bottom:12px; border:1px solid var(--line); }
+  .card h3{ font-size:0.88rem; color:var(--white); font-weight:700; }
+
+  .kpis{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-bottom:16px; }
+  .kpi{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px; }
+  .kpi .num{ font-size:1.5rem; font-weight:800; color:var(--white); line-height:1.1; }
+  .kpi .lbl{ font-size:0.68rem; color:var(--muted); margin-top:3px; }
+  .kpi.ok .num{ color:var(--ok); } .kpi.warn .num{ color:var(--warn); }
+  .kpi.bad .num{ color:var(--bad); } .kpi.info .num{ color:var(--info); }
+
+  .list{ display:flex; flex-direction:column; gap:10px; }
+  .row{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
+  .row .top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .row .title{ font-size:0.9rem; font-weight:700; color:var(--white); }
+  .row .meta{ font-size:0.7rem; color:var(--muted); margin-top:4px; display:flex; gap:8px; flex-wrap:wrap; }
+  .row .meta b{ color:#bbb; font-weight:600; }
+  .row .actions{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+
+  .tag{ display:inline-block; font-size:0.62rem; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .t-ok{ background:rgba(0,230,118,0.12); color:var(--ok); }
+  .t-warn{ background:rgba(255,179,0,0.14); color:var(--warn); }
+  .t-bad{ background:rgba(255,82,82,0.14); color:var(--bad); }
+  .t-info{ background:rgba(64,196,255,0.14); color:var(--info); }
+  .t-mute{ background:var(--card2); color:var(--muted); }
+  .t-ccp{ background:rgba(255,109,0,0.16); color:var(--orange); }
+
+  .empty{ text-align:center; color:var(--muted); font-size:0.8rem; padding:26px 10px; background:var(--card);
+      border:1px dashed var(--line); border-radius:14px; }
+
+  .filters{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  input, select, textarea{ font-family:inherit; font-size:0.8rem; background:var(--card2); color:var(--txt);
+      border:1px solid var(--line); border-radius:10px; padding:9px 11px; width:100%; }
+  input:focus, select:focus, textarea:focus{ outline:none; border-color:rgba(0,230,118,0.5); }
+  textarea{ resize:vertical; min-height:60px; }
+  .filters input, .filters select{ width:auto; flex:1; min-width:130px; }
+
+  .field{ margin-bottom:11px; }
+  .field label{ display:block; font-size:0.72rem; color:var(--muted); font-weight:600; margin-bottom:5px; }
+  .field .hint{ font-size:0.65rem; color:#666; margin-top:4px; }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width:520px){ .grid2{ grid-template-columns:1fr; } }
+
+  .check{ display:flex; align-items:flex-start; gap:9px; background:var(--card2); border-radius:10px;
+      padding:10px 12px; margin-bottom:7px; cursor:pointer; }
+  .check input{ width:auto; margin-top:2px; accent-color:var(--ok); flex-shrink:0; }
+  .check .ct{ font-size:0.78rem; color:var(--txt); font-weight:600; }
+  .check .cs{ font-size:0.66rem; color:var(--muted); margin-top:2px; }
+  .check.critical{ border:1px solid rgba(255,109,0,0.3); }
+
+  .modal-bg{ position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; display:none;
+      align-items:flex-start; justify-content:center; padding:16px; overflow-y:auto; }
+  .modal-bg.open{ display:flex; }
+  .modal{ background:#161616; border:1px solid var(--line); border-radius:18px; width:100%; max-width:560px;
+      padding:18px; margin:auto 0; }
+  .modal h3{ font-size:1rem; color:var(--white); font-weight:800; margin-bottom:3px; }
+  .modal .msub{ font-size:0.7rem; color:var(--muted); margin-bottom:14px; }
+  .modal-actions{ display:flex; gap:8px; margin-top:16px; }
+  .modal-actions .btn{ flex:1; }
+
+  .chain{ display:flex; flex-direction:column; gap:0; }
+  .step{ display:flex; gap:12px; }
+  .step .dot-col{ display:flex; flex-direction:column; align-items:center; }
+  .step .dot{ width:13px; height:13px; border-radius:50%; background:var(--ok); flex-shrink:0; margin-top:5px; }
+  .step .dot.mute{ background:#3a3a3a; } .step .dot.bad{ background:var(--bad); } .step .dot.warn{ background:var(--warn); }
+  .step .bar{ width:2px; flex:1; background:var(--line); margin:4px 0; }
+  .step .body{ padding-bottom:14px; flex:1; }
+  .step .body .st{ font-size:0.82rem; font-weight:700; color:var(--white); }
+  .step .body .sd{ font-size:0.7rem; color:var(--muted); margin-top:3px; line-height:1.6; }
+
+  .toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(120px);
+      background:var(--card2); color:var(--white); font-size:0.8rem; font-weight:600; padding:12px 20px;
+      border-radius:999px; z-index:200; transition:transform 0.25s; border:1px solid var(--line); max-width:90vw; text-align:center; }
+  .toast.show{ transform:translateX(-50%) translateY(0); }
+  .toast.ok{ border-color:rgba(0,230,118,0.4); } .toast.bad{ border-color:rgba(255,82,82,0.4); }
+
+  .alert{ border-radius:12px; padding:11px 13px; font-size:0.76rem; line-height:1.6; margin-bottom:9px; }
+  .a-bad{ background:rgba(255,82,82,0.1); color:#ffb3b3; border:1px solid rgba(255,82,82,0.25); }
+  .a-warn{ background:rgba(255,179,0,0.09); color:#ffdc8a; border:1px solid rgba(255,179,0,0.22); }
+  .a-info{ background:rgba(64,196,255,0.09); color:#a5e2ff; border:1px solid rgba(64,196,255,0.22); }
+  .alert b{ font-weight:800; }
+
+  table{ width:100%; border-collapse:collapse; font-size:0.74rem; }
+  th{ text-align:right; color:var(--muted); font-weight:600; padding:7px 6px; border-bottom:1px solid var(--line); font-size:0.68rem; }
+  td{ padding:8px 6px; border-bottom:1px solid #202020; color:var(--txt); }
+  .table-wrap{ overflow-x:auto; }
+
+  footer{ text-align:center; font-size:0.65rem; color:#555; padding:24px 12px 0; line-height:1.8; }
+
+  @media print{
+    nav, .section-head .btn, .row .actions, footer, .filters { display:none !important; }
+    body{ background:#fff; color:#111; }
+    .card,.row,.kpi{ background:#fff; border:1px solid #ccc; }
+    .row .title,.kpi .num,h1,h2,h3{ color:#111 !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>מערכת שליטה לבטיחות מזון</h1>
+  <p id="plantLine">מפעל מזון · בקרת חומרי גלם לפי תוכנית בטיחות מזון (HACCP)</p>
+</header>
+
+<nav id="nav"></nav>
+
+<main>
+  <section class="view" id="v-dashboard"></section>
+  <section class="view" id="v-suppliers"></section>
+  <section class="view" id="v-materials"></section>
+  <section class="view" id="v-purchase"></section>
+  <section class="view" id="v-receiving"></section>
+  <section class="view" id="v-lots"></section>
+  <section class="view" id="v-release"></section>
+  <section class="view" id="v-nc"></section>
+  <section class="view" id="v-trace"></section>
+  <section class="view" id="v-settings"></section>
+
+  <footer>
+    מערכת שליטה לבטיחות מזון · הנתונים נשמרים מקומית בדפדפן (localStorage)<br>
+    זרימת בקרה: מפרט ← רכש מספק מאושר ← קבלה במחסן ← הסגר ← בדיקה טרם שימוש ← שחרור לייצור / שיווק
+  </footer>
+</main>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ==========================================================================
+   מערכת שליטה לבטיחות מזון — ניהול חומרי גלם משלב המפרט ועד השחרור
+   שכבת נתונים: localStorage. אין תלות בשרת.
+   ========================================================================== */
+
+var KEY = 'fsms_v1';
+var DB = null;
+
+/* ---------- כלי עזר ---------- */
+function uid(){ return Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function addDays(iso, n){ var d = new Date(iso + 'T00:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); }
+function daysUntil(iso){
+  if(!iso) return null;
+  var a = new Date(today() + 'T00:00:00'), b = new Date(iso + 'T00:00:00');
+  return Math.round((b - a) / 86400000);
+}
+function fmt(iso){ if(!iso) return '—'; var p = iso.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
+}
+function byId(arr, id){ for(var i=0;i<arr.length;i++){ if(arr[i].id === id) return arr[i]; } return null; }
+function nextNum(prefix){
+  DB.counters[prefix] = (DB.counters[prefix] || 0) + 1;
+  return prefix + '-' + String(DB.counters[prefix]).padStart(4, '0');
+}
+
+/* ---------- שמירה וטעינה ---------- */
+function save(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(raw){ DB = JSON.parse(raw); }
+  }catch(e){ DB = null; }
+  if(!DB || !DB.materials){ DB = seed(); save(); }
+  if(!DB.settings) DB.settings = defaultSettings();
+}
+function defaultSettings(){
+  return { plant:'מפעל מזון', minShelfLifePct:30, expiryAlertDays:14, blockUnapprovedSupplier:true };
+}
+
+/* ---------- הודעות ומודאל ---------- */
+var toastT = null;
+function toast(msg, kind){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (kind || 'ok');
+  clearTimeout(toastT);
+  toastT = setTimeout(function(){ el.className = 'toast ' + (kind || 'ok'); }, 3200);
+}
+function openModal(html){
+  document.getElementById('modal').innerHTML = html;
+  document.getElementById('modalBg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(){
+  document.getElementById('modalBg').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function val(id){ var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function num(id){ var v = parseFloat(val(id)); return isNaN(v) ? 0 : v; }
+function chk(id){ var e = document.getElementById(id); return !!(e && e.checked); }
+
+/* ---------- מילונים ---------- */
+var ALLERGENS = ['גלוטן','חלב','ביצים','אגוזים','בוטנים','סויה','שומשום','דגים','סלרי','חרדל','סולפיטים'];
+var HAZARD_TYPES = ['ביולוגי','כימי','פיזיקלי','אלרגן'];
+var DOC_TYPES = ['תעודת משלוח','תעודת כשרות','תעודת אנליזה (COA)','אישור בריאות/וטרינרי','תעודת יצרן','דו"ח טמפרטורה'];
+var STORAGE_TYPES = ['יבש','מקורר','קפוא'];
+var SUPPLIER_STATUS = { approved:'מאושר', pending:'בהערכה', suspended:'מושעה' };
+var LOT_STATUS = { quarantine:'בהסגר', released:'משוחרר', blocked:'חסום', consumed:'נוצל' };
+
+/* ---------- בדיקות קבלה (חלקן קריטיות = פסילה אוטומטית) ---------- */
+var RECEIVE_CHECKS = [
+  { k:'docs',      t:'מסמכים נלווים תקינים ומלאים',        s:'תעודת משלוח, כשרות, COA לפי המפרט',       critical:true  },
+  { k:'temp',      t:'טמפרטורת מוצר בתחום המפרט',           s:'נמדדת בפועל בעת הפריקה',                   critical:true  },
+  { k:'vehicle',   t:'רכב ההובלה נקי ומתאים',              s:'ללא ריחות זרים, הפרדת מוצרים, ניקיון',     critical:false },
+  { k:'packaging', t:'אריזות שלמות ללא פגיעה',              s:'ללא קרעים, נזילות, ניפוח או חלודה',        critical:true  },
+  { k:'pests',     t:'ללא סימני מזיקים',                    s:'במטען וברכב',                              critical:true  },
+  { k:'labels',    t:'סימון תקין (אצווה, תוקף, אלרגנים)',   s:'זיהוי מלא לצורך עקיבות',                   critical:true  },
+  { k:'sensory',   t:'בדיקה חושית תקינה בקבלה',             s:'מראה, ריח, צבע',                           critical:false }
+];
+
+/* ---------- בדיקה טרם שימוש ---------- */
+var PREUSE_CHECKS = [
+  { k:'identity',  t:'זיהוי החומר תואם למפרט',      s:'שם, קוד, יצרן ואצווה' },
+  { k:'shelf',     t:'תוקף בתוקף ומספיק לייצור',    s:'לפי דרישת חיי מדף מינימליים' },
+  { k:'storage',   t:'נשמר בתנאי אחסון תקינים',     s:'טמפרטורה, הפרדה מאלרגנים, סדר FEFO' },
+  { k:'integrity', t:'אריזה שלמה ונקייה',           s:'ללא פגיעה במהלך האחסון' },
+  { k:'sensory2',  t:'בדיקה חושית תקינה',           s:'מראה, ריח, מרקם' },
+  { k:'allergen',  t:'הפרדת אלרגנים נשמרה',         s:'ללא זיהום צולב' }
+];
+
+/* ---------- נתוני דמו ---------- */
+function seed(){
+  var db = { settings:defaultSettings(), counters:{}, suppliers:[], materials:[], pos:[],
+             receipts:[], lots:[], checks:[], issues:[], ncs:[] };
+  DB = db;
+
+  var s1 = { id:uid(), code:'SUP-001', name:'טחנות קמח הצפון בע"מ', contact:'רונית לוי', phone:'04-8123456',
+    status:'approved', approvalExpiry:addDays(today(), 210),
+    certs:[{name:'ISO 22000', expiry:addDays(today(),300)}, {name:'תעודת כשרות', expiry:addDays(today(),120)}], notes:'ספק קמח ראשי' };
+  var s2 = { id:uid(), code:'SUP-002', name:'משק ירק טרי', contact:'אבי כהן', phone:'08-9345612',
+    status:'approved', approvalExpiry:addDays(today(), 45),
+    certs:[{name:'GLOBALG.A.P', expiry:addDays(today(),60)}], notes:'ירקות טריים, אספקה יומית' };
+  var s3 = { id:uid(), code:'SUP-003', name:'מעדני עוף הגליל', contact:'סמיר חדד', phone:'04-6778899',
+    status:'approved', approvalExpiry:addDays(today(), 160),
+    certs:[{name:'אישור וטרינרי', expiry:addDays(today(),95)}, {name:'BRCGS', expiry:addDays(today(),240)}], notes:'עוף קפוא' };
+  var s4 = { id:uid(), code:'SUP-004', name:'שמנים ותבלינים דרום', contact:'מירי אזולאי', phone:'08-6554433',
+    status:'pending', approvalExpiry:'', certs:[], notes:'בהערכה — טרם התקבל שאלון ספק ותעודות' };
+  db.suppliers = [s1, s2, s3, s4];
+  db.counters['SUP'] = 4;
+
+  var m1 = { id:uid(), code:'RM-1001', name:'קמח חיטה מלא', category:'אבקות ותערובות', unit:'ק"ג',
+    storage:'יבש', tempMin:5, tempMax:25, shelfLifeDays:270, minShelfLifeDays:90,
+    allergens:['גלוטן'], requiredDocs:['תעודת משלוח','תעודת כשרות','תעודת אנליזה (COA)'],
+    labTest:true, labTestDesc:'לחות, אפר, ספירת עובש — אצווה אחת מכל 5 משלוחים',
+    hazards:[
+      { type:'ביולוגי', desc:'זיהום עובש/מיקוטוקסינים באחסון לח', control:'אחסון יבש מתחת ל-65% לחות + COA מהספק', ccp:false },
+      { type:'פיזיקלי', desc:'גופים זרים — חוטים, אבנים', control:'ניפוי דרך רשת 1.5 מ"מ לפני הייצור', ccp:true },
+      { type:'אלרגן',   desc:'גלוטן — זיהום צולב לקווים ללא גלוטן', control:'אחסון בנפרד וסימון ברור', ccp:false }
+    ],
+    supplierIds:[s1.id], notes:'מפרט גרסה 3', version:3, approvedBy:'מנהל איכות', approvedAt:addDays(today(),-120) };
+
+  var m2 = { id:uid(), code:'RM-2004', name:'חזה עוף קפוא', category:'בשר ועוף', unit:'ק"ג',
+    storage:'קפוא', tempMin:-25, tempMax:-18, shelfLifeDays:365, minShelfLifeDays:120,
+    allergens:[], requiredDocs:['תעודת משלוח','אישור בריאות/וטרינרי','תעודת כשרות','דו"ח טמפרטורה'],
+    labTest:true, labTestDesc:'סלמונלה, ליסטריה — כל משלוח',
+    hazards:[
+      { type:'ביולוגי', desc:'סלמונלה / ליסטריה', control:'קבלה מתחת ל-18°C- + בדיקת מעבדה + בישול לליבה 75°C', ccp:true },
+      { type:'כימי',   desc:'שאריות אנטיביוטיקה', control:'COA וספק מאושר בלבד', ccp:false },
+      { type:'פיזיקלי', desc:'שברי עצם', control:'בקרה ויזואלית בקו + גלאי מתכות', ccp:false }
+    ],
+    supplierIds:[s3.id], notes:'שרשרת קירור רציפה — חובה תיעוד טמפרטורה בהובלה', version:5, approvedBy:'מנהל איכות', approvedAt:addDays(today(),-60) };
+
+  var m3 = { id:uid(), code:'RM-3007', name:'עגבניות טריות', category:'ירקות טריים', unit:'ק"ג',
+    storage:'מקורר', tempMin:2, tempMax:8, shelfLifeDays:12, minShelfLifeDays:5,
+    allergens:[], requiredDocs:['תעודת משלוח','תעודת כשרות'],
+    labTest:false, labTestDesc:'',
+    hazards:[
+      { type:'כימי',   desc:'שאריות חומרי הדברה', control:'ספק GLOBALG.A.P + דגימת שאריות רבעונית', ccp:false },
+      { type:'ביולוגי', desc:'E.coli מהשקיה/קרקע', control:'שטיפה וחיטוי בכלור 100ppm לפני שימוש', ccp:true }
+    ],
+    supplierIds:[s2.id], notes:'FEFO קפדני — חיי מדף קצרים', version:2, approvedBy:'מנהל איכות', approvedAt:addDays(today(),-200) };
+
+  var m4 = { id:uid(), code:'RM-4002', name:'שמן קנולה', category:'שמנים', unit:'ליטר',
+    storage:'יבש', tempMin:10, tempMax:25, shelfLifeDays:540, minShelfLifeDays:180,
+    allergens:[], requiredDocs:['תעודת משלוח','תעודת אנליזה (COA)','תעודת כשרות'],
+    labTest:false, labTestDesc:'',
+    hazards:[
+      { type:'כימי', desc:'חמצון / ערך פרוקסיד גבוה', control:'COA לכל אצווה + אחסון מוגן משמש', ccp:false }
+    ],
+    supplierIds:[s4.id], notes:'', version:1, approvedBy:'מנהל איכות', approvedAt:addDays(today(),-30) };
+
+  db.materials = [m1, m2, m3, m4];
+  db.counters['RM'] = 4;
+
+  /* הזמנת רכש שהתקבלה במלואה — קמח */
+  var po1 = { id:uid(), number:nextNum('PO'), materialId:m1.id, supplierId:s1.id, qty:1000, unit:'ק"ג',
+    orderDate:addDays(today(),-20), dueDate:addDays(today(),-14), status:'received', specVersion:3, notes:'' };
+  var po2 = { id:uid(), number:nextNum('PO'), materialId:m2.id, supplierId:s3.id, qty:400, unit:'ק"ג',
+    orderDate:addDays(today(),-10), dueDate:addDays(today(),-6), status:'received', specVersion:5, notes:'' };
+  var po3 = { id:uid(), number:nextNum('PO'), materialId:m3.id, supplierId:s2.id, qty:150, unit:'ק"ג',
+    orderDate:addDays(today(),-2), dueDate:addDays(today(),1), status:'open', specVersion:2, notes:'אספקה שבועית' };
+  db.pos = [po1, po2, po3];
+
+  /* קבלה תקינה — קמח → אצווה משוחררת שנוצלה חלקית */
+  var r1 = { id:uid(), number:nextNum('GRN'), poId:po1.id, materialId:m1.id, supplierId:s1.id,
+    date:addDays(today(),-14), supplierLot:'FL-88231', qty:1000, unit:'ק"ג', expiry:addDays(today(),240),
+    temp:21, checks:{docs:true,temp:true,vehicle:true,packaging:true,pests:true,labels:true,sensory:true},
+    decision:'quarantine', inspector:'מחסנאי — דוד', notes:'', findings:[] };
+  var l1 = { id:uid(), code:nextNum('LOT'), materialId:m1.id, supplierId:s1.id, receiptId:r1.id,
+    qty:1000, remaining:640, unit:'ק"ג', expiry:r1.expiry, status:'released', createdAt:r1.date };
+  var c1 = { id:uid(), lotId:l1.id, date:addDays(today(),-13),
+    items:{identity:true,shelf:true,storage:true,integrity:true,sensory2:true,allergen:true},
+    labResult:'pass', decision:'released', inspector:'מנהל איכות', notes:'COA תקין, ניפוי בוצע' };
+  var i1 = { id:uid(), lotId:l1.id, type:'production', qty:360, ref:'BATCH-2411', date:addDays(today(),-12),
+    operator:'ראש קו ייצור', notes:'ייצור לחם מלא' };
+
+  /* קבלה עם חריגת טמפרטורה — עוף → נפסל + אי-התאמה */
+  var r2 = { id:uid(), number:nextNum('GRN'), poId:po2.id, materialId:m2.id, supplierId:s3.id,
+    date:addDays(today(),-6), supplierLot:'CH-5521', qty:400, unit:'ק"ג', expiry:addDays(today(),300),
+    temp:-9, checks:{docs:true,temp:false,vehicle:true,packaging:true,pests:true,labels:true,sensory:true},
+    decision:'rejected', inspector:'מחסנאי — דוד', notes:'טמפרטורה נמדדה 9°C- מול דרישת מפרט 18°C- ומטה',
+    findings:['חריגה קריטית: טמפרטורת מוצר בתחום המפרט'] };
+  var nc1 = { id:uid(), number:nextNum('NC'), date:r2.date, source:'קבלה במחסן', refType:'receipt', refId:r2.id,
+    title:'חריגת טמפרטורה בקבלת חזה עוף קפוא', severity:'critical',
+    desc:'המשלוח התקבל ב-9°C- במקום 18°C- ומטה. הסחורה הוחזרה לספק ולא נכנסה למלאי.',
+    status:'open', capa:'בירור מול הספק לגבי תקינות מערכת הקירור ברכב; דרישה לתיעוד טמפרטורה רציף בכל משלוח.',
+    closedAt:'', closedBy:'' };
+
+  /* קבלה תקינה — עוף (משלוח חוזר) → בהסגר, ממתין לבדיקה טרם שימוש */
+  var r3 = { id:uid(), number:nextNum('GRN'), poId:po2.id, materialId:m2.id, supplierId:s3.id,
+    date:addDays(today(),-3), supplierLot:'CH-5540', qty:400, unit:'ק"ג', expiry:addDays(today(),320),
+    temp:-21, checks:{docs:true,temp:true,vehicle:true,packaging:true,pests:true,labels:true,sensory:true},
+    decision:'quarantine', inspector:'מחסנאי — דוד', notes:'משלוח חלופי', findings:[] };
+  var l3 = { id:uid(), code:nextNum('LOT'), materialId:m2.id, supplierId:s3.id, receiptId:r3.id,
+    qty:400, remaining:400, unit:'ק"ג', expiry:r3.expiry, status:'quarantine', createdAt:r3.date };
+
+  /* עגבניות — משוחררות, תוקף מתקרב */
+  var r4 = { id:uid(), number:nextNum('GRN'), poId:null, materialId:m3.id, supplierId:s2.id,
+    date:addDays(today(),-2), supplierLot:'TM-0912', qty:150, unit:'ק"ג', expiry:addDays(today(),5),
+    temp:5, checks:{docs:true,temp:true,vehicle:true,packaging:true,pests:true,labels:true,sensory:true},
+    decision:'quarantine', inspector:'מחסנאי — נועה', notes:'', findings:[] };
+  var l4 = { id:uid(), code:nextNum('LOT'), materialId:m3.id, supplierId:s2.id, receiptId:r4.id,
+    qty:150, remaining:110, unit:'ק"ג', expiry:r4.expiry, status:'released', createdAt:r4.date };
+  var c4 = { id:uid(), lotId:l4.id, date:addDays(today(),-2),
+    items:{identity:true,shelf:true,storage:true,integrity:true,sensory2:true,allergen:true},
+    labResult:'na', decision:'released', inspector:'מנהל איכות', notes:'שטיפה וחיטוי לפני שימוש' };
+  var i4 = { id:uid(), lotId:l4.id, type:'customer', qty:40, ref:'רשת מזון "טעם הבית" — משלוח 8842',
+    date:addDays(today(),-1), operator:'מנהל שיווק', notes:'שיווק ישיר כתוצרת טרייה' };
+
+  db.receipts = [r1, r2, r3, r4];
+  db.lots = [l1, l3, l4];
+  db.checks = [c1, c4];
+  db.issues = [i1, i4];
+  db.ncs = [nc1];
+  return db;
+}
+
+/* ==========================================================================
+   ניווט
+   ========================================================================== */
+var VIEWS = [
+  { id:'dashboard', label:'לוח בקרה',        render:renderDashboard },
+  { id:'materials', label:'מפרטי חומרי גלם', render:renderMaterials },
+  { id:'suppliers', label:'ספקים',           render:renderSuppliers },
+  { id:'purchase',  label:'רכש',             render:renderPurchase },
+  { id:'receiving', label:'קבלה במחסן',      render:renderReceiving },
+  { id:'lots',      label:'אצוות ובדיקה',    render:renderLots },
+  { id:'release',   label:'שחרור לייצור/שיווק', render:renderRelease },
+  { id:'nc',        label:'אי-התאמות',       render:renderNC },
+  { id:'trace',     label:'עקיבות',          render:renderTrace },
+  { id:'settings',  label:'הגדרות וגיבוי',   render:renderSettings }
+];
+var current = 'dashboard';
+
+function buildNav(){
+  var nav = document.getElementById('nav');
+  nav.innerHTML = VIEWS.map(function(v){
+    var badge = navBadge(v.id);
+    return '<button data-v="' + v.id + '" class="' + (v.id === current ? 'active' : '') + '">' +
+      esc(v.label) + (badge ? ' <span class="cnt">(' + badge + ')</span>' : '') + '</button>';
+  }).join('');
+  Array.prototype.forEach.call(nav.querySelectorAll('button'), function(b){
+    b.onclick = function(){ go(b.getAttribute('data-v')); };
+  });
+}
+function navBadge(id){
+  if(id === 'lots')     return DB.lots.filter(function(l){ return l.status === 'quarantine'; }).length || '';
+  if(id === 'nc')       return DB.ncs.filter(function(n){ return n.status === 'open'; }).length || '';
+  if(id === 'purchase') return DB.pos.filter(function(p){ return p.status === 'open'; }).length || '';
+  return '';
+}
+function go(id){
+  current = id;
+  buildNav();
+  Array.prototype.forEach.call(document.querySelectorAll('.view'), function(s){ s.classList.remove('active'); });
+  var el = document.getElementById('v-' + id);
+  el.classList.add('active');
+  var v = VIEWS.filter(function(x){ return x.id === id; })[0];
+  v.render(el);
+  window.scrollTo(0, 0);
+}
+function refresh(){ buildNav(); go(current); }
+
+/* ==========================================================================
+   התראות מערכת — מנוע הבקרה
+   ========================================================================== */
+function alerts(){
+  var out = [];
+  var S = DB.settings;
+
+  DB.lots.forEach(function(l){
+    var m = byId(DB.materials, l.materialId);
+    var d = daysUntil(l.expiry);
+    if(l.status === 'consumed' || l.status === 'blocked') return;
+    if(d !== null && d < 0){
+      out.push({ level:'bad', text:'אצווה <b>' + esc(l.code) + '</b> (' + esc(m ? m.name : '') + ') פגת תוקף — חסימה מיידית ופתיחת אי-התאמה.', act:{ label:'חסום אצווה', fn:'blockLot', arg:l.id } });
+    } else if(d !== null && d <= S.expiryAlertDays){
+      out.push({ level:'warn', text:'אצווה <b>' + esc(l.code) + '</b> (' + esc(m ? m.name : '') + ') תפוג בעוד ' + d + ' ימים — עדיפות FEFO.' });
+    }
+  });
+
+  DB.lots.filter(function(l){ return l.status === 'quarantine'; }).forEach(function(l){
+    var m = byId(DB.materials, l.materialId);
+    out.push({ level:'info', text:'אצווה <b>' + esc(l.code) + '</b> (' + esc(m ? m.name : '') + ') בהסגר — נדרשת בדיקה טרם שימוש לפני כניסה לייצור.', act:{ label:'בצע בדיקה', fn:'preUseForm', arg:l.id } });
+  });
+
+  DB.suppliers.forEach(function(s){
+    if(s.status === 'approved' && s.approvalExpiry){
+      var d = daysUntil(s.approvalExpiry);
+      if(d !== null && d < 0) out.push({ level:'bad', text:'אישור הספק <b>' + esc(s.name) + '</b> פג — אין לרכוש ממנו עד לחידוש.' });
+      else if(d !== null && d <= 60) out.push({ level:'warn', text:'אישור הספק <b>' + esc(s.name) + '</b> יפוג בעוד ' + d + ' ימים.' });
+    }
+    (s.certs || []).forEach(function(c){
+      var d = daysUntil(c.expiry);
+      if(d !== null && d < 0) out.push({ level:'bad', text:'תעודת <b>' + esc(c.name) + '</b> של ' + esc(s.name) + ' פגה.' });
+      else if(d !== null && d <= 30) out.push({ level:'warn', text:'תעודת <b>' + esc(c.name) + '</b> של ' + esc(s.name) + ' תפוג בעוד ' + d + ' ימים.' });
+    });
+  });
+
+  var openNC = DB.ncs.filter(function(n){ return n.status === 'open'; });
+  openNC.forEach(function(n){
+    out.push({ level: n.severity === 'critical' ? 'bad' : 'warn',
+      text:'אי-התאמה פתוחה <b>' + esc(n.number) + '</b>: ' + esc(n.title) + ' — נדרשת פעולה מתקנת.' });
+  });
+
+  DB.pos.filter(function(p){ return p.status === 'open'; }).forEach(function(p){
+    var d = daysUntil(p.dueDate);
+    if(d !== null && d < 0){
+      var m = byId(DB.materials, p.materialId);
+      out.push({ level:'warn', text:'הזמנת רכש <b>' + esc(p.number) + '</b> (' + esc(m ? m.name : '') + ') באיחור של ' + Math.abs(d) + ' ימים.' });
+    }
+  });
+
+  var rank = { bad:0, warn:1, info:2 };
+  out.sort(function(a,b){ return rank[a.level] - rank[b.level]; });
+  return out;
+}
+
+/* ==========================================================================
+   לוח בקרה
+   ========================================================================== */
+function renderDashboard(el){
+  var quarantine = DB.lots.filter(function(l){ return l.status === 'quarantine'; }).length;
+  var released   = DB.lots.filter(function(l){ return l.status === 'released'; }).length;
+  var blocked    = DB.lots.filter(function(l){ return l.status === 'blocked'; }).length;
+  var openNC     = DB.ncs.filter(function(n){ return n.status === 'open'; }).length;
+  var rejected   = DB.receipts.filter(function(r){ return r.decision === 'rejected'; }).length;
+  var accepted   = DB.receipts.length - rejected;
+  var rate = DB.receipts.length ? Math.round(accepted / DB.receipts.length * 100) : 100;
+  var A = alerts();
+
+  var html = '<div class="section-head"><div><h2>לוח בקרה</h2>' +
+    '<div class="sub">' + esc(DB.settings.plant) + ' · מצב נכון ל-' + fmt(today()) + '</div></div>' +
+    '<button class="btn ghost sm" onclick="window.print()">הדפסה / PDF</button></div>';
+
+  html += '<div class="kpis">' +
+    kpi(DB.materials.length, 'מפרטי חומרי גלם', 'info') +
+    kpi(DB.suppliers.filter(function(s){ return s.status === 'approved'; }).length, 'ספקים מאושרים', 'ok') +
+    kpi(DB.pos.filter(function(p){ return p.status === 'open'; }).length, 'הזמנות רכש פתוחות', '') +
+    kpi(quarantine, 'אצוות בהסגר', quarantine ? 'warn' : '') +
+    kpi(released, 'אצוות משוחררות', 'ok') +
+    kpi(blocked, 'אצוות חסומות', blocked ? 'bad' : '') +
+    kpi(openNC, 'אי-התאמות פתוחות', openNC ? 'bad' : 'ok') +
+    kpi(rate + '%', 'שיעור קבלות תקינות', rate >= 95 ? 'ok' : 'warn') +
+    '</div>';
+
+  html += '<div class="card"><h3 style="margin-bottom:10px;">התראות בקרה (' + A.length + ')</h3>';
+  if(!A.length){
+    html += '<div class="empty">אין התראות פתוחות — כל הבקרות תקינות.</div>';
+  } else {
+    html += A.map(function(a){
+      var cls = a.level === 'bad' ? 'a-bad' : (a.level === 'warn' ? 'a-warn' : 'a-info');
+      var btn = a.act ? ' <button class="btn sm ghost" style="margin-top:7px;" onclick="' + a.act.fn + "('" + a.act.arg + "')" + '">' + esc(a.act.label) + '</button>' : '';
+      return '<div class="alert ' + cls + '">' + a.text + btn + '</div>';
+    }).join('');
+  }
+  html += '</div>';
+
+  html += '<div class="card"><h3 style="margin-bottom:10px;">זרימת הבקרה</h3>' +
+    flowStep('1', 'הגדרת חומר גלם ומפרט', DB.materials.length + ' מפרטים מאושרים', 'materials') +
+    flowStep('2', 'רכש מספק מאושר לפי מפרט', DB.pos.length + ' הזמנות · חסימת ספק לא מאושר: ' + (DB.settings.blockUnapprovedSupplier ? 'פעילה' : 'כבויה'), 'purchase') +
+    flowStep('3', 'קבלה במחסן ובדיקת התאמה', DB.receipts.length + ' קבלות · ' + rejected + ' נפסלו', 'receiving') +
+    flowStep('4', 'הסגר ובדיקה טרם שימוש', quarantine + ' בהסגר · ' + released + ' שוחררו', 'lots') +
+    flowStep('5', 'הכנסה לייצור או שיווק ללקוח', DB.issues.length + ' הנפקות מתועדות', 'release') +
+    '</div>';
+
+  html += '<div class="card"><h3 style="margin-bottom:10px;">פעילות אחרונה</h3>' + recentTable() + '</div>';
+  el.innerHTML = html;
+}
+function kpi(n, l, c){ return '<div class="kpi ' + c + '"><div class="num">' + n + '</div><div class="lbl">' + l + '</div></div>'; }
+function flowStep(n, t, s, target){
+  return '<div class="step"><div class="dot-col"><div class="dot"></div><div class="bar"></div></div>' +
+    '<div class="body"><div class="st">' + n + '. ' + esc(t) + '</div><div class="sd">' + esc(s) +
+    ' · <a href="#" onclick="go(\'' + target + '\');return false;" style="color:var(--info);">מעבר</a></div></div></div>';
+}
+function recentTable(){
+  var ev = [];
+  DB.receipts.forEach(function(r){
+    var m = byId(DB.materials, r.materialId);
+    ev.push({ d:r.date, t:'קבלה ' + r.number, x:(m ? m.name : '') + ' · ' + (r.decision === 'rejected' ? 'נפסל' : 'התקבל להסגר') });
+  });
+  DB.checks.forEach(function(c){
+    var l = byId(DB.lots, c.lotId), m = l ? byId(DB.materials, l.materialId) : null;
+    ev.push({ d:c.date, t:'בדיקה טרם שימוש', x:(l ? l.code : '') + ' · ' + (m ? m.name : '') + ' · ' + (c.decision === 'released' ? 'שוחרר' : c.decision === 'hold' ? 'מוחזק' : 'נחסם') });
+  });
+  DB.issues.forEach(function(i){
+    var l = byId(DB.lots, i.lotId), m = l ? byId(DB.materials, l.materialId) : null;
+    ev.push({ d:i.date, t:(i.type === 'production' ? 'הכנסה לייצור' : 'שיווק ללקוח'), x:(m ? m.name : '') + ' · ' + i.qty + ' · ' + i.ref });
+  });
+  DB.ncs.forEach(function(n){ ev.push({ d:n.date, t:'אי-התאמה ' + n.number, x:n.title }); });
+  ev.sort(function(a,b){ return a.d < b.d ? 1 : -1; });
+  ev = ev.slice(0, 10);
+  if(!ev.length) return '<div class="empty">אין פעילות</div>';
+  return '<div class="table-wrap"><table><tr><th>תאריך</th><th>אירוע</th><th>פרטים</th></tr>' +
+    ev.map(function(e){ return '<tr><td>' + fmt(e.d) + '</td><td>' + esc(e.t) + '</td><td>' + esc(e.x) + '</td></tr>'; }).join('') +
+    '</table></div>';
+}
+
+/* ==========================================================================
+   1. הגדרת חומרי גלם — מפרטים
+   ========================================================================== */
+var matFilter = '';
+function renderMaterials(el){
+  var html = '<div class="section-head"><div><h2>מפרטי חומרי גלם</h2>' +
+    '<div class="sub">הגדרת החומר, סיכוני בטיחות מזון, תנאי אחסון ודרישות קבלה</div></div>' +
+    '<button class="btn" onclick="materialForm()">+ מפרט חדש</button></div>';
+
+  html += '<div class="filters"><input id="matSearch" placeholder="חיפוש לפי שם / קוד / קטגוריה" value="' + esc(matFilter) + '" oninput="matFilter=this.value;renderMaterials(document.getElementById(\'v-materials\'));document.getElementById(\'matSearch\').focus()"></div>';
+
+  var q = matFilter.trim();
+  var list = DB.materials.filter(function(m){
+    return !q || (m.name + ' ' + m.code + ' ' + m.category).indexOf(q) > -1;
+  });
+  if(!list.length){ el.innerHTML = html + '<div class="empty">לא נמצאו מפרטים</div>'; return; }
+
+  html += '<div class="list">' + list.map(function(m){
+    var sups = (m.supplierIds || []).map(function(id){ var s = byId(DB.suppliers, id); return s ? s.name : '?'; });
+    var ccp = (m.hazards || []).filter(function(h){ return h.ccp; }).length;
+    var lots = DB.lots.filter(function(l){ return l.materialId === m.id && l.status !== 'consumed'; }).length;
+    return '<div class="row"><div class="top"><div>' +
+      '<div class="title">' + esc(m.name) + '</div>' +
+      '<div class="meta"><span><b>' + esc(m.code) + '</b></span><span>' + esc(m.category) + '</span>' +
+      '<span>אחסון: ' + esc(m.storage) + ' ' + m.tempMin + '° עד ' + m.tempMax + '°</span>' +
+      '<span>חיי מדף: ' + m.shelfLifeDays + ' ימים</span>' +
+      '<span>מינימום בקבלה: ' + m.minShelfLifeDays + ' ימים</span></div>' +
+      '<div class="meta" style="margin-top:6px;">' +
+        (m.allergens && m.allergens.length ? '<span class="tag t-warn">אלרגנים: ' + m.allergens.map(esc).join(', ') + '</span>' : '<span class="tag t-mute">ללא אלרגנים</span>') +
+        (ccp ? '<span class="tag t-ccp">' + ccp + ' CCP</span>' : '') +
+        (m.labTest ? '<span class="tag t-info">בדיקת מעבדה</span>' : '') +
+        '<span class="tag t-mute">גרסה ' + (m.version || 1) + '</span>' +
+        '<span class="tag t-mute">' + lots + ' אצוות במלאי</span>' +
+      '</div>' +
+      '<div class="meta" style="margin-top:6px;"><span>ספקים מאושרים: ' + (sups.length ? esc(sups.join(' · ')) : '<i>לא הוגדרו</i>') + '</span></div>' +
+      '</div></div>' +
+      '<div class="actions">' +
+        '<button class="btn sm ghost" onclick="materialDetails(\'' + m.id + '\')">פירוט מלא</button>' +
+        '<button class="btn sm ghost" onclick="materialForm(\'' + m.id + '\')">עריכה</button>' +
+        '<button class="btn sm info" onclick="poForm(null,\'' + m.id + '\')">הזמנת רכש</button>' +
+        '<button class="btn sm danger" onclick="delMaterial(\'' + m.id + '\')">מחיקה</button>' +
+      '</div></div>';
+  }).join('') + '</div>';
+  el.innerHTML = html;
+}
+
+function materialDetails(id){
+  var m = byId(DB.materials, id);
+  if(!m) return;
+  var h = '<h3>' + esc(m.name) + ' <span class="tag t-mute">' + esc(m.code) + '</span></h3>' +
+    '<div class="msub">מפרט גרסה ' + (m.version || 1) + ' · אושר ע"י ' + esc(m.approvedBy || '—') + ' בתאריך ' + fmt(m.approvedAt) + '</div>';
+
+  h += '<div class="card"><h3>הגדרה ותנאי אחסון</h3><div class="meta" style="font-size:0.74rem;color:#bbb;line-height:2;margin-top:6px;">' +
+    'קטגוריה: ' + esc(m.category) + '<br>יחידת מידה: ' + esc(m.unit) + '<br>' +
+    'סוג אחסון: ' + esc(m.storage) + ' (' + m.tempMin + '°C עד ' + m.tempMax + '°C)<br>' +
+    'חיי מדף מלאים: ' + m.shelfLifeDays + ' ימים · חיי מדף מינימליים נדרשים בקבלה: ' + m.minShelfLifeDays + ' ימים<br>' +
+    'אלרגנים: ' + (m.allergens && m.allergens.length ? esc(m.allergens.join(', ')) : 'ללא') + '</div></div>';
+
+  h += '<div class="card"><h3>סיכונים ואמצעי בקרה</h3>' +
+    ((m.hazards || []).length ? '<div class="table-wrap"><table><tr><th>סוג</th><th>הסיכון</th><th>אמצעי בקרה</th><th>CCP</th></tr>' +
+      m.hazards.map(function(z){
+        return '<tr><td>' + esc(z.type) + '</td><td>' + esc(z.desc) + '</td><td>' + esc(z.control) + '</td><td>' +
+          (z.ccp ? '<span class="tag t-ccp">CCP</span>' : '—') + '</td></tr>';
+      }).join('') + '</table></div>' : '<div class="empty">לא הוגדרו סיכונים</div>') + '</div>';
+
+  h += '<div class="card"><h3>דרישות קבלה</h3><div style="font-size:0.74rem;color:#bbb;line-height:2;margin-top:6px;">' +
+    'מסמכים נדרשים: ' + ((m.requiredDocs || []).length ? esc(m.requiredDocs.join(' · ')) : 'לא הוגדרו') + '<br>' +
+    'בדיקת מעבדה: ' + (m.labTest ? 'נדרשת — ' + esc(m.labTestDesc || '') : 'לא נדרשת') + '<br>' +
+    'טווח טמפרטורה בקבלה: ' + m.tempMin + '°C עד ' + m.tempMax + '°C</div></div>';
+
+  if(m.notes) h += '<div class="card"><h3>הערות</h3><div style="font-size:0.74rem;color:#bbb;margin-top:6px;">' + esc(m.notes) + '</div></div>';
+  h += '<div class="modal-actions"><button class="btn ghost" onclick="closeModal()">סגירה</button></div>';
+  openModal(h);
+}
+
+function materialForm(id){
+  var m = id ? byId(DB.materials, id) : null;
+  var isNew = !m;
+  m = m || { code:'', name:'', category:'', unit:'ק"ג', storage:'יבש', tempMin:5, tempMax:25,
+    shelfLifeDays:180, minShelfLifeDays:60, allergens:[], requiredDocs:['תעודת משלוח'],
+    labTest:false, labTestDesc:'', hazards:[], supplierIds:[], notes:'', version:1, approvedBy:'', approvedAt:today() };
+
+  var h = '<h3>' + (isNew ? 'מפרט חומר גלם חדש' : 'עריכת מפרט') + '</h3>' +
+    '<div class="msub">המפרט הוא בסיס הבקרה — לפיו נרכש החומר ולפיו נבדק בקבלה</div>';
+
+  h += '<div class="grid2">' +
+    fText('mCode', 'קוד חומר גלם', m.code, 'RM-1234') +
+    fText('mName', 'שם החומר', m.name, 'קמח חיטה מלא') + '</div>';
+  h += '<div class="grid2">' + fText('mCat', 'קטגוריה', m.category, 'אבקות ותערובות') +
+    fText('mUnit', 'יחידת מידה', m.unit, 'ק"ג') + '</div>';
+  h += '<div class="grid2">' +
+    fSelect('mStorage', 'סוג אחסון', STORAGE_TYPES, m.storage) +
+    fText('mVer', 'גרסת מפרט', m.version, '1', 'number') + '</div>';
+  h += '<div class="grid2">' + fText('mTmin', 'טמפ\' מינימלית (°C)', m.tempMin, '', 'number') +
+    fText('mTmax', 'טמפ\' מקסימלית (°C)', m.tempMax, '', 'number') + '</div>';
+  h += '<div class="grid2">' + fText('mShelf', 'חיי מדף (ימים)', m.shelfLifeDays, '', 'number') +
+    fText('mMinShelf', 'חיי מדף מינימליים בקבלה (ימים)', m.minShelfLifeDays, '', 'number') + '</div>';
+
+  h += '<div class="field"><label>אלרגנים</label><div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+    ALLERGENS.map(function(a, i){
+      var on = m.allergens.indexOf(a) > -1;
+      return '<label class="tag ' + (on ? 't-warn' : 't-mute') + '" style="cursor:pointer;padding:6px 10px;">' +
+        '<input type="checkbox" id="alg' + i + '" ' + (on ? 'checked' : '') + ' style="width:auto;margin-left:4px;vertical-align:middle;">' + esc(a) + '</label>';
+    }).join('') + '</div></div>';
+
+  h += '<div class="field"><label>מסמכים נדרשים בקבלה</label><div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+    DOC_TYPES.map(function(d, i){
+      var on = m.requiredDocs.indexOf(d) > -1;
+      return '<label class="tag ' + (on ? 't-info' : 't-mute') + '" style="cursor:pointer;padding:6px 10px;">' +
+        '<input type="checkbox" id="doc' + i + '" ' + (on ? 'checked' : '') + ' style="width:auto;margin-left:4px;vertical-align:middle;">' + esc(d) + '</label>';
+    }).join('') + '</div></div>';
+
+  h += '<div class="field"><label class="check" style="margin:0;"><input type="checkbox" id="mLab" ' + (m.labTest ? 'checked' : '') + '>' +
+    '<div><div class="ct">נדרשת בדיקת מעבדה לפני שחרור</div><div class="cs">האצווה לא תשוחרר לייצור ללא תוצאת מעבדה תקינה</div></div></label></div>';
+  h += fText('mLabDesc', 'פירוט בדיקת המעבדה', m.labTestDesc, 'סלמונלה, ליסטריה — כל משלוח');
+
+  h += '<div class="field"><label>ספקים מאושרים לחומר זה</label>' +
+    DB.suppliers.map(function(s, i){
+      var on = m.supplierIds.indexOf(s.id) > -1;
+      return '<label class="check" style="padding:8px 11px;"><input type="checkbox" id="sup' + i + '" ' + (on ? 'checked' : '') + '>' +
+        '<div><div class="ct">' + esc(s.name) + '</div><div class="cs">' + esc(SUPPLIER_STATUS[s.status]) + ' · ' + esc(s.code) + '</div></div></label>';
+    }).join('') + '</div>';
+
+  h += '<div class="field"><label>סיכונים ואמצעי בקרה</label><div id="hazBox">' + hazRows(m.hazards) + '</div>' +
+    '<button class="btn sm ghost" style="margin-top:6px;" onclick="addHazRow()">+ הוספת סיכון</button></div>';
+
+  h += '<div class="grid2">' + fText('mApprover', 'אושר ע"י', m.approvedBy, 'מנהל איכות') +
+    fText('mApproved', 'תאריך אישור', m.approvedAt || today(), '', 'date') + '</div>';
+  h += '<div class="field"><label>הערות</label><textarea id="mNotes">' + esc(m.notes) + '</textarea></div>';
+
+  h += '<div class="modal-actions"><button class="btn" onclick="saveMaterial(' + (isNew ? 'null' : "'" + id + "'") + ')">שמירה</button>' +
+    '<button class="btn ghost" onclick="closeModal()">ביטול</button></div>';
+  openModal(h);
+}
+function hazRows(hz){
+  return (hz || []).map(function(z, i){ return hazRow(z, i); }).join('');
+}
+var hazSeq = 0;
+function hazRow(z, i){
+  z = z || { type:'ביולוגי', desc:'', control:'', ccp:false };
+  var n = 'hz' + i;
+  return '<div class="card" style="padding:10px;margin-bottom:8px;" data-haz="1">' +
+    '<div class="grid2">' + fSelect(n + 'type', 'סוג הסיכון', HAZARD_TYPES, z.type) +
+    '<div class="field"><label>נקודת בקרה</label><label class="check" style="margin:0;padding:8px;">' +
+    '<input type="checkbox" id="' + n + 'ccp" ' + (z.ccp ? 'checked' : '') + '><div class="ct">CCP — נקודת בקרה קריטית</div></label></div></div>' +
+    fText(n + 'desc', 'תיאור הסיכון', z.desc, 'זיהום מיקרוביאלי') +
+    fText(n + 'ctrl', 'אמצעי בקרה', z.control, 'קבלה בטמפ\' תקינה + בדיקת מעבדה') +
+    '<button class="btn sm danger" onclick="this.parentNode.remove()">הסרה</button></div>';
+}
+function addHazRow(){
+  var box = document.getElementById('hazBox');
+  var wrap = document.createElement('div');
+  wrap.innerHTML = hazRow(null, 100 + (hazSeq++));
+  box.appendChild(wrap.firstChild);
+}
+function fText(id, label, v, ph, type){
+  return '<div class="field"><label>' + esc(label) + '</label>' +
+    '<input id="' + id + '" type="' + (type || 'text') + '" value="' + esc(v == null ? '' : v) + '" placeholder="' + esc(ph || '') + '"></div>';
+}
+function fSelect(id, label, opts, v){
+  return '<div class="field"><label>' + esc(label) + '</label><select id="' + id + '">' +
+    opts.map(function(o){
+      var value = typeof o === 'string' ? o : o.v;
+      var text  = typeof o === 'string' ? o : o.t;
+      return '<option value="' + esc(value) + '" ' + (value === v ? 'selected' : '') + '>' + esc(text) + '</option>';
+    }).join('') + '</select></div>';
+}
+
+function saveMaterial(id){
+  var name = val('mName'), code = val('mCode');
+  if(!name || !code){ toast('חובה למלא קוד ושם חומר גלם', 'bad'); return; }
+  var allergens = ALLERGENS.filter(function(a, i){ return chk('alg' + i); });
+  var docs = DOC_TYPES.filter(function(d, i){ return chk('doc' + i); });
+  var sups = DB.suppliers.filter(function(s, i){ return chk('sup' + i); }).map(function(s){ return s.id; });
+
+  var hazards = [];
+  Array.prototype.forEach.call(document.querySelectorAll('[data-haz]'), function(box){
+    var sel = box.querySelector('select');
+    var ccp = box.querySelector('input[type=checkbox]');
+    var texts = box.querySelectorAll('input[type=text]');
+    if(!texts.length) return;
+    var desc = texts[0].value.trim(), ctrl = texts[1] ? texts[1].value.trim() : '';
+    if(!desc) return;
+    hazards.push({ type:sel.value, desc:desc, control:ctrl, ccp:!!(ccp && ccp.checked) });
+  });
+
+  var obj = {
+    code:code, name:name, category:val('mCat'), unit:val('mUnit') || 'ק"ג', storage:val('mStorage'),
+    tempMin:num('mTmin'), tempMax:num('mTmax'), shelfLifeDays:num('mShelf'), minShelfLifeDays:num('mMinShelf'),
+    allergens:allergens, requiredDocs:docs, labTest:chk('mLab'), labTestDesc:val('mLabDesc'),
+    hazards:hazards, supplierIds:sups, notes:val('mNotes'), version:num('mVer') || 1,
+    approvedBy:val('mApprover'), approvedAt:val('mApproved') || today()
+  };
+  if(obj.tempMin > obj.tempMax){ toast('טמפרטורה מינימלית גדולה מהמקסימלית', 'bad'); return; }
+
+  if(id){
+    var m = byId(DB.materials, id);
+    for(var k in obj) m[k] = obj[k];
+    toast('המפרט עודכן');
+  } else {
+    obj.id = uid();
+    DB.materials.push(obj);
+    toast('נוצר מפרט חדש');
+  }
+  save(); closeModal(); refresh();
+}
+function delMaterial(id){
+  var used = DB.lots.filter(function(l){ return l.materialId === id; }).length +
+             DB.pos.filter(function(p){ return p.materialId === id; }).length;
+  if(used){ toast('לא ניתן למחוק — קיימות הזמנות או אצוות המקושרות למפרט', 'bad'); return; }
+  if(!confirm('למחוק את המפרט?')) return;
+  DB.materials = DB.materials.filter(function(m){ return m.id !== id; });
+  save(); refresh(); toast('המפרט נמחק');
+}
+
+/* ==========================================================================
+   ספקים מאושרים
+   ========================================================================== */
+function renderSuppliers(el){
+  var html = '<div class="section-head"><div><h2>ספקים</h2>' +
+    '<div class="sub">רכש מותר רק מספק מאושר בעל תעודות בתוקף</div></div>' +
+    '<button class="btn" onclick="supplierForm()">+ ספק חדש</button></div>';
+
+  if(!DB.suppliers.length){ el.innerHTML = html + '<div class="empty">לא הוגדרו ספקים</div>'; return; }
+
+  html += '<div class="list">' + DB.suppliers.map(function(s){
+    var st = supplierState(s);
+    var mats = DB.materials.filter(function(m){ return (m.supplierIds || []).indexOf(s.id) > -1; });
+    var certs = (s.certs || []).map(function(c){
+      var d = daysUntil(c.expiry);
+      var cls = d === null ? 't-mute' : (d < 0 ? 't-bad' : (d <= 30 ? 't-warn' : 't-ok'));
+      return '<span class="tag ' + cls + '">' + esc(c.name) + ' · ' + fmt(c.expiry) + '</span>';
+    }).join(' ');
+    return '<div class="row"><div class="top"><div>' +
+      '<div class="title">' + esc(s.name) + '</div>' +
+      '<div class="meta"><span><b>' + esc(s.code) + '</b></span><span>' + esc(s.contact || '') + '</span><span>' + esc(s.phone || '') + '</span>' +
+      (s.approvalExpiry ? '<span>אישור עד ' + fmt(s.approvalExpiry) + '</span>' : '') + '</div>' +
+      '<div class="meta" style="margin-top:6px;"><span class="tag ' + st.cls + '">' + esc(st.label) + '</span>' + certs + '</div>' +
+      '<div class="meta" style="margin-top:6px;"><span>חומרי גלם: ' + (mats.length ? esc(mats.map(function(m){ return m.name; }).join(' · ')) : '<i>לא שויכו</i>') + '</span></div>' +
+      (s.notes ? '<div class="meta" style="margin-top:5px;"><span>' + esc(s.notes) + '</span></div>' : '') +
+      '</div></div>' +
+      '<div class="actions">' +
+        '<button class="btn sm ghost" onclick="supplierForm(\'' + s.id + '\')">עריכה</button>' +
+        '<button class="btn sm danger" onclick="delSupplier(\'' + s.id + '\')">מחיקה</button>' +
+      '</div></div>';
+  }).join('') + '</div>';
+  el.innerHTML = html;
+}
+
+/* מצב ספק אפקטיבי — משקלל תוקף אישור ותעודות */
+function supplierState(s){
+  if(s.status === 'suspended') return { ok:false, cls:'t-bad',  label:'מושעה — אסור לרכוש' };
+  if(s.status === 'pending')   return { ok:false, cls:'t-warn', label:'בהערכה — טרם אושר' };
+  var d = s.approvalExpiry ? daysUntil(s.approvalExpiry) : null;
+  if(d !== null && d < 0) return { ok:false, cls:'t-bad', label:'אישור פג תוקף' };
+  var expired = (s.certs || []).filter(function(c){ return daysUntil(c.expiry) < 0; });
+  if(expired.length) return { ok:false, cls:'t-bad', label:'תעודה פגה: ' + expired[0].name };
+  return { ok:true, cls:'t-ok', label:'מאושר' };
+}
+
+function supplierForm(id){
+  var s = id ? byId(DB.suppliers, id) : null;
+  var isNew = !s;
+  s = s || { code:'', name:'', contact:'', phone:'', status:'pending', approvalExpiry:'', certs:[], notes:'' };
+
+  var h = '<h3>' + (isNew ? 'ספק חדש' : 'עריכת ספק') + '</h3><div class="msub">ספק שאינו מאושר ייחסם ברכש ובקבלה</div>';
+  h += '<div class="grid2">' + fText('sCode', 'קוד ספק', s.code || nextCode('SUP'), '') + fText('sName', 'שם הספק', s.name, '') + '</div>';
+  h += '<div class="grid2">' + fText('sContact', 'איש קשר', s.contact, '') + fText('sPhone', 'טלפון', s.phone, '') + '</div>';
+  h += '<div class="grid2">' +
+    fSelect('sStatus', 'סטטוס אישור', [{v:'approved',t:'מאושר'},{v:'pending',t:'בהערכה'},{v:'suspended',t:'מושעה'}], s.status) +
+    fText('sExpiry', 'תוקף אישור הספק', s.approvalExpiry, '', 'date') + '</div>';
+  h += '<div class="field"><label>תעודות (ISO/BRC/כשרות/וטרינרי)</label><div id="certBox">' +
+    (s.certs || []).map(function(c, i){ return certRow(c, i); }).join('') + '</div>' +
+    '<button class="btn sm ghost" style="margin-top:6px;" onclick="addCertRow()">+ הוספת תעודה</button></div>';
+  h += '<div class="field"><label>הערות</label><textarea id="sNotes">' + esc(s.notes || '') + '</textarea></div>';
+  h += '<div class="modal-actions"><button class="btn" onclick="saveSupplier(' + (isNew ? 'null' : "'" + id + "'") + ')">שמירה</button>' +
+    '<button class="btn ghost" onclick="closeModal()">ביטול</button></div>';
+  openModal(h);
+}
+var certSeq = 0;
+function certRow(c, i){
+  c = c || { name:'', expiry:'' };
+  return '<div class="card" style="padding:10px;margin-bottom:8px;" data-cert="1"><div class="grid2">' +
+    fText('cn' + i, 'שם התעודה', c.name, 'ISO 22000') + fText('ce' + i, 'תוקף', c.expiry, '', 'date') + '</div>' +
+    '<button class="btn sm danger" onclick="this.parentNode.remove()">הסרה</button></div>';
+}
+function addCertRow(){
+  var box = document.getElementById('certBox');
+  var w = document.createElement('div');
+  w.innerHTML = certRow(null, 200 + (certSeq++));
+  box.appendChild(w.firstChild);
+}
+function nextCode(prefix){
+  var n = (DB.counters[prefix] || 0) + 1;
+  return prefix + '-' + String(n).padStart(3, '0');
+}
+function saveSupplier(id){
+  var name = val('sName');
+  if(!name){ toast('חובה למלא שם ספק', 'bad'); return; }
+  var certs = [];
+  Array.prototype.forEach.call(document.querySelectorAll('[data-cert]'), function(box){
+    var ins = box.querySelectorAll('input');
+    if(ins[0] && ins[0].value.trim()) certs.push({ name:ins[0].value.trim(), expiry:ins[1] ? ins[1].value : '' });
+  });
+  var obj = { code:val('sCode'), name:name, contact:val('sContact'), phone:val('sPhone'),
+    status:val('sStatus'), approvalExpiry:val('sExpiry'), certs:certs, notes:val('sNotes') };
+  if(id){
+    var s = byId(DB.suppliers, id);
+    for(var k in obj) s[k] = obj[k];
+    toast('פרטי הספק עודכנו');
+  } else {
+    obj.id = uid();
+    DB.counters['SUP'] = (DB.counters['SUP'] || 0) + 1;
+    DB.suppliers.push(obj);
+    toast('נוסף ספק חדש');
+  }
+  save(); closeModal(); refresh();
+}
+function delSupplier(id){
+  var used = DB.pos.filter(function(p){ return p.supplierId === id; }).length +
+             DB.receipts.filter(function(r){ return r.supplierId === id; }).length;
+  if(used){ toast('לא ניתן למחוק — לספק היסטוריית רכש/קבלות', 'bad'); return; }
+  if(!confirm('למחוק את הספק?')) return;
+  DB.suppliers = DB.suppliers.filter(function(s){ return s.id !== id; });
+  DB.materials.forEach(function(m){ m.supplierIds = (m.supplierIds || []).filter(function(x){ return x !== id; }); });
+  save(); refresh(); toast('הספק נמחק');
+}
+
+/* ==========================================================================
+   2. רכש לפי מפרט
+   ========================================================================== */
+function renderPurchase(el){
+  var html = '<div class="section-head"><div><h2>הזמנות רכש</h2>' +
+    '<div class="sub">כל הזמנה מקובעת לגרסת המפרט ולספק מאושר בלבד</div></div>' +
+    '<button class="btn" onclick="poForm()">+ הזמנה חדשה</button></div>';
+
+  if(!DB.pos.length){ el.innerHTML = html + '<div class="empty">אין הזמנות רכש</div>'; return; }
+
+  var sorted = DB.pos.slice().sort(function(a,b){ return a.orderDate < b.orderDate ? 1 : -1; });
+  html += '<div class="list">' + sorted.map(function(p){
+    var m = byId(DB.materials, p.materialId), s = byId(DB.suppliers, p.supplierId);
+    var st = p.status === 'open' ? '<span class="tag t-info">פתוחה</span>' :
+             p.status === 'received' ? '<span class="tag t-ok">התקבלה</span>' : '<span class="tag t-mute">בוטלה</span>';
+    var late = p.status === 'open' && daysUntil(p.dueDate) < 0;
+    var rec = DB.receipts.filter(function(r){ return r.poId === p.id; });
+    var got = rec.reduce(function(a,r){ return a + (r.decision === 'rejected' ? 0 : r.qty); }, 0);
+    var specNote = m && m.version !== p.specVersion ?
+      '<span class="tag t-warn">המפרט עודכן לגרסה ' + m.version + ' — ההזמנה לפי גרסה ' + p.specVersion + '</span>' : '';
+    return '<div class="row"><div class="top"><div>' +
+      '<div class="title">' + esc(p.number) + ' · ' + esc(m ? m.name : 'חומר שנמחק') + '</div>' +
+      '<div class="meta"><span>ספק: <b>' + esc(s ? s.name : '?') + '</b></span>' +
+      '<span>כמות: <b>' + p.qty + ' ' + esc(p.unit) + '</b></span>' +
+      '<span>הוזמן: ' + fmt(p.orderDate) + '</span><span>לאספקה: ' + fmt(p.dueDate) + '</span>' +
+      '<span>התקבל בפועל: ' + got + ' ' + esc(p.unit) + '</span></div>' +
+      '<div class="meta" style="margin-top:6px;">' + st +
+        '<span class="tag t-mute">מפרט גרסה ' + p.specVersion + '</span>' +
+        (late ? '<span class="tag t-bad">באיחור</span>' : '') + specNote + '</div>' +
+      (p.notes ? '<div class="meta" style="margin-top:5px;"><span>' + esc(p.notes) + '</span></div>' : '') +
+      '</div></div><div class="actions">' +
+        (p.status === 'open' ? '<button class="btn sm" onclick="receiveForm(null,\'' + p.id + '\')">קליטת משלוח</button>' : '') +
+        '<button class="btn sm ghost" onclick="poForm(\'' + p.id + '\')">עריכה</button>' +
+        (p.status === 'open' ? '<button class="btn sm warn" onclick="cancelPO(\'' + p.id + '\')">ביטול</button>' : '') +
+        '<button class="btn sm danger" onclick="delPO(\'' + p.id + '\')">מחיקה</button>' +
+      '</div></div>';
+  }).join('') + '</div>';
+  el.innerHTML = html;
+}
+
+function poForm(id, presetMaterial){
+  if(!DB.materials.length){ toast('יש להגדיר מפרט חומר גלם לפני רכש', 'bad'); return; }
+  var p = id ? byId(DB.pos, id) : null;
+  var isNew = !p;
+  p = p || { materialId:presetMaterial || DB.materials[0].id, supplierId:'', qty:0, unit:'',
+             orderDate:today(), dueDate:addDays(today(), 7), status:'open', notes:'' };
+
+  var h = '<h3>' + (isNew ? 'הזמנת רכש חדשה' : 'עריכת הזמנה ' + esc(p.number)) + '</h3>' +
+    '<div class="msub">בחירת החומר קובעת את המפרט, הספקים המאושרים ויחידת המידה</div>';
+  h += fSelect('pMat', 'חומר גלם (לפי מפרט)', DB.materials.map(function(m){ return { v:m.id, t:m.code + ' · ' + m.name + ' (גרסה ' + m.version + ')' }; }), p.materialId);
+  h += '<div class="field"><label>ספק</label><select id="pSup"></select><div class="hint" id="pSupHint"></div></div>';
+  h += '<div class="grid2">' + fText('pQty', 'כמות', p.qty || '', '', 'number') + fText('pUnit', 'יחידת מידה', p.unit, '') + '</div>';
+  h += '<div class="grid2">' + fText('pOrder', 'תאריך הזמנה', p.orderDate, '', 'date') + fText('pDue', 'תאריך אספקה נדרש', p.dueDate, '', 'date') + '</div>';
+  h += '<div class="field" id="specBox"></div>';
+  h += '<div class="field"><label>הערות</label><textarea id="pNotes">' + esc(p.notes || '') + '</textarea></div>';
+  h += '<div class="modal-actions"><button class="btn" onclick="savePO(' + (isNew ? 'null' : "'" + id + "'") + ')">שמירה</button>' +
+    '<button class="btn ghost" onclick="closeModal()">ביטול</button></div>';
+  openModal(h);
+  document.getElementById('pMat').onchange = function(){ poMatChanged(p.supplierId); };
+  poMatChanged(p.supplierId);
+}
+function poMatChanged(keepSupplier){
+  var m = byId(DB.materials, val('pMat'));
+  var sel = document.getElementById('pSup');
+  var approved = DB.suppliers.filter(function(s){ return (m.supplierIds || []).indexOf(s.id) > -1; });
+  var pool = approved.length ? approved : DB.suppliers;
+  sel.innerHTML = pool.map(function(s){
+    var st = supplierState(s);
+    return '<option value="' + s.id + '" ' + (s.id === keepSupplier ? 'selected' : '') + '>' +
+      esc(s.name) + ' — ' + esc(st.label) + (approved.length ? '' : ' (לא משויך למפרט)') + '</option>';
+  }).join('') || '<option value="">אין ספקים</option>';
+  document.getElementById('pSupHint').textContent = approved.length ?
+    'מוצגים רק ספקים המשויכים למפרט זה' : 'שים לב: לא שויכו ספקים מאושרים למפרט — יש לעדכן את המפרט';
+  var u = document.getElementById('pUnit');
+  if(!u.value) u.value = m.unit;
+  document.getElementById('specBox').innerHTML =
+    '<label>תמצית המפרט המחייבת את הספק</label><div class="alert a-info">' +
+    'אחסון ' + esc(m.storage) + ' · טמפרטורה ' + m.tempMin + '°C עד ' + m.tempMax + '°C<br>' +
+    'חיי מדף מינימליים בקבלה: ' + m.minShelfLifeDays + ' ימים<br>' +
+    'מסמכים נדרשים: ' + esc((m.requiredDocs || []).join(' · ') || 'לא הוגדרו') +
+    (m.allergens && m.allergens.length ? '<br>אלרגנים להצהרה: ' + esc(m.allergens.join(', ')) : '') + '</div>';
+}
+function savePO(id){
+  var m = byId(DB.materials, val('pMat'));
+  var s = byId(DB.suppliers, val('pSup'));
+  if(!m || !s){ toast('יש לבחור חומר גלם וספק', 'bad'); return; }
+  var st = supplierState(s);
+  if(!st.ok && DB.settings.blockUnapprovedSupplier){
+    toast('רכש חסום — הספק ' + s.name + ': ' + st.label, 'bad'); return;
+  }
+  if((m.supplierIds || []).indexOf(s.id) === -1 && !confirm('הספק אינו משויך למפרט זה. להמשיך בכל זאת?')) return;
+  var qty = num('pQty');
+  if(qty <= 0){ toast('יש להזין כמות', 'bad'); return; }
+
+  var obj = { materialId:m.id, supplierId:s.id, qty:qty, unit:val('pUnit') || m.unit,
+    orderDate:val('pOrder') || today(), dueDate:val('pDue'), specVersion:m.version, notes:val('pNotes') };
+  if(id){
+    var p = byId(DB.pos, id);
+    for(var k in obj) p[k] = obj[k];
+    toast('ההזמנה עודכנה');
+  } else {
+    obj.id = uid(); obj.number = nextNum('PO'); obj.status = 'open';
+    DB.pos.push(obj);
+    toast('נוצרה הזמנת רכש ' + obj.number);
+  }
+  save(); closeModal(); refresh();
+}
+function cancelPO(id){
+  var p = byId(DB.pos, id);
+  if(!confirm('לבטל את הזמנה ' + p.number + '?')) return;
+  p.status = 'cancelled'; save(); refresh(); toast('ההזמנה בוטלה');
+}
+function delPO(id){
+  if(DB.receipts.filter(function(r){ return r.poId === id; }).length){ toast('לא ניתן למחוק — קיימות קבלות להזמנה', 'bad'); return; }
+  if(!confirm('למחוק את ההזמנה?')) return;
+  DB.pos = DB.pos.filter(function(p){ return p.id !== id; });
+  save(); refresh(); toast('ההזמנה נמחקה');
+}
+
+/* ==========================================================================
+   3. קבלה במחסן
+   ========================================================================== */
+function renderReceiving(el){
+  var html = '<div class="section-head"><div><h2>קבלה במחסן</h2>' +
+    '<div class="sub">בדיקת התאמה למפרט בעת הפריקה · חריגה בבדיקה קריטית פוסלת את המשלוח אוטומטית</div></div>' +
+    '<button class="btn" onclick="receiveForm()">+ קליטת משלוח</button></div>';
+
+  if(!DB.receipts.length){ el.innerHTML = html + '<div class="empty">לא נקלטו משלוחים</div>'; return; }
+
+  var sorted = DB.receipts.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  html += '<div class="list">' + sorted.map(function(r){
+    var m = byId(DB.materials, r.materialId), s = byId(DB.suppliers, r.supplierId);
+    var po = r.poId ? byId(DB.pos, r.poId) : null;
+    var lot = DB.lots.filter(function(l){ return l.receiptId === r.id; })[0];
+    var st = r.decision === 'rejected' ? '<span class="tag t-bad">נפסל — הוחזר לספק</span>' : '<span class="tag t-warn">התקבל להסגר</span>';
+    var failed = RECEIVE_CHECKS.filter(function(c){ return !r.checks[c.k]; });
+    return '<div class="row"><div class="top"><div>' +
+      '<div class="title">' + esc(r.number) + ' · ' + esc(m ? m.name : '') + '</div>' +
+      '<div class="meta"><span>ספק: <b>' + esc(s ? s.name : '?') + '</b></span>' +
+      '<span>תאריך: ' + fmt(r.date) + '</span>' +
+      '<span>אצוות ספק: <b>' + esc(r.supplierLot) + '</b></span>' +
+      '<span>כמות: ' + r.qty + ' ' + esc(r.unit) + '</span>' +
+      '<span>תוקף: ' + fmt(r.expiry) + '</span>' +
+      '<span>טמפ\' נמדדה: <b>' + r.temp + '°C</b></span>' +
+      (po ? '<span>הזמנה: ' + esc(po.number) + '</span>' : '<span>ללא הזמנה</span>') + '</div>' +
+      '<div class="meta" style="margin-top:6px;">' + st +
+        (lot ? '<span class="tag t-info">אצווה ' + esc(lot.code) + '</span>' : '') +
+        '<span class="tag t-mute">בדק: ' + esc(r.inspector || '—') + '</span></div>' +
+      (failed.length ? '<div class="alert a-bad" style="margin-top:8px;">חריגות: ' +
+        esc(failed.map(function(c){ return c.t; }).join(' · ')) + '</div>' : '') +
+      ((r.findings || []).length ? '<div class="alert a-warn" style="margin-top:6px;">' +
+        (r.findings || []).map(esc).join('<br>') + '</div>' : '') +
+      (r.notes ? '<div class="meta" style="margin-top:5px;"><span>' + esc(r.notes) + '</span></div>' : '') +
+      '</div></div><div class="actions">' +
+        (lot ? '<button class="btn sm ghost" onclick="go(\'lots\')">מעבר לאצווה</button>' : '') +
+        '<button class="btn sm danger" onclick="delReceipt(\'' + r.id + '\')">מחיקה</button>' +
+      '</div></div>';
+  }).join('') + '</div>';
+  el.innerHTML = html;
+}
+
+function receiveForm(id, poId){
+  if(!DB.materials.length){ toast('יש להגדיר מפרט לפני קליטת משלוח', 'bad'); return; }
+  var po = poId ? byId(DB.pos, poId) : null;
+  var mId = po ? po.materialId : DB.materials[0].id;
+
+  var h = '<h3>קליטת משלוח במחסן</h3><div class="msub">הבדיקות מבוצעות מול המפרט המאושר של החומר</div>';
+  h += fSelect('rPO', 'הזמנת רכש', [{ v:'', t:'ללא הזמנה (קבלה חריגה)' }].concat(
+      DB.pos.filter(function(p){ return p.status === 'open' || (po && p.id === po.id); }).map(function(p){
+        var m = byId(DB.materials, p.materialId);
+        return { v:p.id, t:p.number + ' · ' + (m ? m.name : '') + ' · ' + p.qty + ' ' + p.unit };
+      })), po ? po.id : '');
+  h += fSelect('rMat', 'חומר גלם', DB.materials.map(function(m){ return { v:m.id, t:m.code + ' · ' + m.name }; }), mId);
+  h += fSelect('rSup', 'ספק', DB.suppliers.map(function(s){ return { v:s.id, t:s.name + ' — ' + supplierState(s).label }; }), po ? po.supplierId : '');
+  h += '<div id="rSpec"></div>';
+  h += '<div class="grid2">' + fText('rDate', 'תאריך קבלה', today(), '', 'date') +
+       fText('rLot', 'מספר אצוות הספק', '', 'LOT-1234') + '</div>';
+  h += '<div class="grid2">' + fText('rQty', 'כמות שהתקבלה', po ? po.qty : '', '', 'number') +
+       fText('rUnit', 'יחידת מידה', po ? po.unit : '', '') + '</div>';
+  h += '<div class="grid2">' + fText('rExp', 'תאריך תפוגה על האריזה', '', '', 'date') +
+       fText('rTemp', 'טמפרטורה שנמדדה (°C)', '', '', 'number') + '</div>';
+  h += '<div class="field"><label>בדיקות קבלה מול המפרט</label>' +
+    RECEIVE_CHECKS.map(function(c){
+      return '<label class="check ' + (c.critical ? 'critical' : '') + '"><input type="checkbox" id="rc_' + c.k + '" checked>' +
+        '<div><div class="ct">' + esc(c.t) + (c.critical ? ' <span class="tag t-ccp">קריטי</span>' : '') + '</div>' +
+        '<div class="cs">' + esc(c.s) + '</div></div></label>';
+    }).join('') + '<div class="hint">כשל בבדיקה קריטית פוסל את המשלוח ופותח אי-התאמה אוטומטית</div></div>';
+  h += fText('rInspector', 'שם הבודק', 'מחסנאי', '');
+  h += '<div class="field"><label>הערות</label><textarea id="rNotes"></textarea></div>';
+  h += '<div class="modal-actions"><button class="btn" onclick="saveReceipt()">שמירת קבלה</button>' +
+    '<button class="btn ghost" onclick="closeModal()">ביטול</button></div>';
+  openModal(h);
+
+  document.getElementById('rPO').onchange = function(){
+    var p = byId(DB.pos, val('rPO'));
+    if(p){
+      document.getElementById('rMat').value = p.materialId;
+      document.getElementById('rSup').value = p.supplierId;
+      document.getElementById('rQty').value = p.qty;
+      document.getElementById('rUnit').value = p.unit;
+    }
+    recSpec();
+  };
+  document.getElementById('rMat').onchange = recSpec;
+  document.getElementById('rTemp').oninput = recSpec;
+  document.getElementById('rExp').onchange = recSpec;
+  recSpec();
+}
+function recSpec(){
+  var m = byId(DB.materials, val('rMat'));
+  if(!m) return;
+  var u = document.getElementById('rUnit'); if(!u.value) u.value = m.unit;
+  var t = val('rTemp'), exp = val('rExp');
+  var warn = '';
+  if(t !== ''){
+    var tv = parseFloat(t);
+    if(tv < m.tempMin || tv > m.tempMax){
+      warn += '<div class="alert a-bad">חריגת טמפרטורה: נמדד ' + tv + '°C מול דרישה ' + m.tempMin + '°C עד ' + m.tempMax + '°C — המשלוח ייפסל.</div>';
+      var cb = document.getElementById('rc_temp'); if(cb) cb.checked = false;
+    } else {
+      var cb2 = document.getElementById('rc_temp'); if(cb2) cb2.checked = true;
+    }
+  }
+  if(exp){
+    var d = daysUntil(exp);
+    if(d < 0) warn += '<div class="alert a-bad">המוצר פג תוקף — אסור לקלוט.</div>';
+    else if(d < m.minShelfLifeDays) warn += '<div class="alert a-warn">חיי מדף שנותרו: ' + d + ' ימים — פחות מהמינימום הנדרש (' + m.minShelfLifeDays + ') · תיפתח אי-התאמה.</div>';
+  }
+  document.getElementById('rSpec').innerHTML =
+    '<div class="alert a-info">מפרט ' + esc(m.code) + ' גרסה ' + m.version + ': אחסון ' + esc(m.storage) +
+    ' · טמפרטורה ' + m.tempMin + '°C עד ' + m.tempMax + '°C · חיי מדף מינימליים ' + m.minShelfLifeDays + ' ימים<br>' +
+    'מסמכים נדרשים: ' + esc((m.requiredDocs || []).join(' · ') || 'לא הוגדרו') + '</div>' + warn;
+}
+
+function saveReceipt(){
+  var m = byId(DB.materials, val('rMat'));
+  var s = byId(DB.suppliers, val('rSup'));
+  if(!m || !s){ toast('יש לבחור חומר גלם וספק', 'bad'); return; }
+  var qty = num('rQty'), expiry = val('rExp'), temp = val('rTemp') === '' ? null : num('rTemp');
+  var lotSup = val('rLot');
+  if(qty <= 0){ toast('יש להזין כמות', 'bad'); return; }
+  if(!lotSup){ toast('חובה לרשום מספר אצוות ספק — נדרש לעקיבות', 'bad'); return; }
+  if(!expiry){ toast('חובה לרשום תאריך תפוגה', 'bad'); return; }
+
+  var checks = {}, findings = [];
+  RECEIVE_CHECKS.forEach(function(c){ checks[c.k] = chk('rc_' + c.k); });
+
+  /* בקרות אוטומטיות מול המפרט */
+  if(temp !== null && (temp < m.tempMin || temp > m.tempMax)){
+    checks.temp = false;
+    findings.push('חריגת טמפרטורה: נמדד ' + temp + '°C מול טווח מפרט ' + m.tempMin + '°C עד ' + m.tempMax + '°C');
+  }
+  var dLeft = daysUntil(expiry);
+  if(dLeft < 0){ findings.push('המוצר התקבל לאחר תאריך התפוגה (' + fmt(expiry) + ')'); checks.labels = false; }
+  else if(dLeft < m.minShelfLifeDays){ findings.push('חיי מדף שנותרו ' + dLeft + ' ימים — מתחת למינימום הנדרש (' + m.minShelfLifeDays + ' ימים)'); }
+
+  var supSt = supplierState(s);
+  if(!supSt.ok){
+    findings.push('ספק לא מאושר בעת הקבלה: ' + supSt.label);
+    checks.docs = false;
+  }
+  if((m.supplierIds || []).indexOf(s.id) === -1){
+    findings.push('הספק אינו משויך למפרט ' + m.code);
+  }
+
+  var criticalFail = RECEIVE_CHECKS.filter(function(c){ return c.critical && !checks[c.k]; });
+  var decision = criticalFail.length ? 'rejected' : 'quarantine';
+
+  var r = { id:uid(), number:nextNum('GRN'), poId:val('rPO') || null, materialId:m.id, supplierId:s.id,
+    date:val('rDate') || today(), supplierLot:lotSup, qty:qty, unit:val('rUnit') || m.unit,
+    expiry:expiry, temp:temp, checks:checks, decision:decision, inspector:val('rInspector'),
+    notes:val('rNotes'), findings:findings };
+  DB.receipts.push(r);
+
+  if(decision === 'rejected'){
+    addNC({ source:'קבלה במחסן', refType:'receipt', refId:r.id, severity:'critical',
+      title:'משלוח נפסל בקבלה — ' + m.name + ' (' + r.number + ')',
+      desc:'כשל בבדיקות קריטיות: ' + criticalFail.map(function(c){ return c.t; }).join(', ') +
+           (findings.length ? '. ' + findings.join('. ') : ''),
+      capa:'החזרת המשלוח לספק, תיעוד מול הספק ובחינת דירוגו במערך הספקים המאושרים.' });
+    toast('המשלוח נפסל — נפתחה אי-התאמה', 'bad');
+  } else {
+    var lot = { id:uid(), code:nextNum('LOT'), materialId:m.id, supplierId:s.id, receiptId:r.id,
+      qty:qty, remaining:qty, unit:r.unit, expiry:expiry, status:'quarantine', createdAt:r.date };
+    DB.lots.push(lot);
+    if(findings.length){
+      addNC({ source:'קבלה במחסן', refType:'receipt', refId:r.id, severity:'major',
+        title:'ליקויים בקבלת ' + m.name + ' (' + r.number + ')',
+        desc:findings.join('. '),
+        capa:'בחינת ההחלטה מול מנהל האיכות טרם שחרור האצווה לייצור.' });
+      toast('המשלוח נקלט להסגר עם ליקויים — אצווה ' + lot.code, 'bad');
+    } else {
+      toast('המשלוח נקלט להסגר · אצווה ' + lot.code);
+    }
+  }
+  var po = r.poId ? byId(DB.pos, r.poId) : null;
+  if(po && decision !== 'rejected') po.status = 'received';
+  save(); closeModal(); refresh();
+}
+function delReceipt(id){
+  var lot = DB.lots.filter(function(l){ return l.receiptId === id; })[0];
+  if(lot && (lot.status !== 'quarantine' || lot.remaining !== lot.qty)){
+    toast('לא ניתן למחוק — האצווה כבר טופלה', 'bad'); return;
+  }
+  if(!confirm('למחוק את רשומת הקבלה?')) return;
+  DB.receipts = DB.receipts.filter(function(r){ return r.id !== id; });
+  DB.lots = DB.lots.filter(function(l){ return l.receiptId !== id; });
+  DB.ncs = DB.ncs.filter(function(n){ return !(n.refType === 'receipt' && n.refId === id); });
+  save(); refresh(); toast('הקבלה נמחקה');
+}
+
+/* ==========================================================================
+   4. אצוות במלאי + בדיקה טרם שימוש
+   ========================================================================== */
+var lotFilter = 'all';
+function renderLots(el){
+  var html = '<div class="section-head"><div><h2>אצוות ובדיקה טרם שימוש</h2>' +
+    '<div class="sub">אצווה בהסגר אינה זמינה לייצור או לשיווק עד שחרור מבוקר</div></div></div>';
+
+  html += '<div class="filters">' +
+    ['all','quarantine','released','blocked','consumed'].map(function(k){
+      var lbl = k === 'all' ? 'הכל' : LOT_STATUS[k];
+      var n = k === 'all' ? DB.lots.length : DB.lots.filter(function(l){ return l.status === k; }).length;
+      return '<button class="btn sm ' + (lotFilter === k ? '' : 'ghost') + '" onclick="lotFilter=\'' + k + '\';go(\'lots\')">' +
+        esc(lbl) + ' (' + n + ')</button>';
+    }).join('') + '</div>';
+
+  var list = DB.lots.filter(function(l){ return lotFilter === 'all' || l.status === lotFilter; });
+  list.sort(function(a,b){ return (a.expiry || '') > (b.expiry || '') ? 1 : -1; }); /* FEFO */
+  if(!list.length){ el.innerHTML = html + '<div class="empty">אין אצוות להצגה</div>'; return; }
+
+  html += '<div class="list">' + list.map(function(l){
+    var m = byId(DB.materials, l.materialId), s = byId(DB.suppliers, l.supplierId);
+    var r = byId(DB.receipts, l.receiptId);
+    var c = DB.checks.filter(function(x){ return x.lotId === l.id; }).slice(-1)[0];
+    var d = daysUntil(l.expiry);
+    var stCls = l.status === 'released' ? 't-ok' : l.status === 'quarantine' ? 't-warn' :
+                l.status === 'blocked' ? 't-bad' : 't-mute';
+    var expTag = d === null ? '' : (d < 0 ? '<span class="tag t-bad">פג תוקף</span>' :
+      (d <= DB.settings.expiryAlertDays ? '<span class="tag t-warn">' + d + ' ימים לתפוגה</span>' : ''));
+    return '<div class="row"><div class="top"><div>' +
+      '<div class="title">' + esc(l.code) + ' · ' + esc(m ? m.name : '') + '</div>' +
+      '<div class="meta"><span>ספק: <b>' + esc(s ? s.name : '') + '</b></span>' +
+      '<span>אצוות ספק: ' + esc(r ? r.supplierLot : '') + '</span>' +
+      '<span>התקבל: ' + fmt(l.createdAt) + '</span>' +
+      '<span>תוקף: <b>' + fmt(l.expiry) + '</b></span>' +
+      '<span>יתרה: <b>' + l.remaining + '</b> מתוך ' + l.qty + ' ' + esc(l.unit) + '</span></div>' +
+      '<div class="meta" style="margin-top:6px;"><span class="tag ' + stCls + '">' + esc(LOT_STATUS[l.status]) + '</span>' + expTag +
+        (m && m.labTest ? '<span class="tag t-info">נדרשת מעבדה</span>' : '') +
+        (c ? '<span class="tag t-mute">נבדק ' + fmt(c.date) + ' ע"י ' + esc(c.inspector) + '</span>' : '') + '</div>' +
+      (c && c.notes ? '<div class="meta" style="margin-top:5px;"><span>' + esc(c.notes) + '</span></div>' : '') +
+      '</div></div><div class="actions">' +
+        (l.status === 'quarantine' ? '<button class="btn sm" onclick="preUseForm(\'' + l.id + '\')">בדיקה טרם שימוש</button>' : '') +
+        (l.status === 'released' && l.remaining > 0 ? '<button class="btn sm" onclick="issueForm(\'' + l.id + '\')">הנפקה לייצור / לקוח</button>' : '') +
+        (l.status !== 'blocked' && l.status !== 'consumed' ? '<button class="btn sm danger" onclick="blockLot(\'' + l.id + '\')">חסימה</button>' : '') +
+        '<button class="btn sm ghost" onclick="traceLot(\'' + l.id + '\')">עקיבות</button>' +
+      '</div></div>';
+  }).join('') + '</div>';
+  el.innerHTML = html;
+}
+
+function preUseForm(lotId){
+  var l = byId(DB.lots, lotId);
+  if(!l) return;
+  if(l.status !== 'quarantine'){ toast('בדיקה טרם שימוש רלוונטית רק לאצווה בהסגר', 'bad'); return; }
+  var m = byId(DB.materials, l.materialId);
+  var d = daysUntil(l.expiry);
+
+  var h = '<h3>בדיקה טרם שימוש · ' + esc(l.code) + '</h3>' +
+    '<div class="msub">' + esc(m ? m.name : '') + ' · יתרה ' + l.remaining + ' ' + esc(l.unit) + ' · תוקף ' + fmt(l.expiry) + '</div>';
+
+  if(d < 0) h += '<div class="alert a-bad">האצווה פגת תוקף — לא ניתן לשחרר לייצור או לשיווק.</div>';
+  else if(d < m.minShelfLifeDays) h += '<div class="alert a-warn">נותרו ' + d + ' ימים בלבד — מתחת לחיי המדף המינימליים במפרט (' + m.minShelfLifeDays + ').</div>';
+
+  h += '<div class="field"><label>רשימת בדיקה</label>' +
+    PREUSE_CHECKS.map(function(c){
+      return '<label class="check"><input type="checkbox" id="pu_' + c.k + '" checked>' +
+        '<div><div class="ct">' + esc(c.t) + '</div><div class="cs">' + esc(c.s) + '</div></div></label>';
+    }).join('') + '</div>';
+
+  h += fSelect('puLab', 'תוצאת בדיקת מעבדה' + (m.labTest ? ' (נדרשת לפי המפרט)' : ''),
+    [{v:'pass',t:'תקין'},{v:'fail',t:'נכשל'},{v:'na',t:'לא נדרש / טרם התקבל'}], m.labTest ? 'pass' : 'na');
+  if(m.labTest && m.labTestDesc) h += '<div class="alert a-info">בדיקות נדרשות: ' + esc(m.labTestDesc) + '</div>';
+
+  h += '<div class="grid2">' + fText('puDate', 'תאריך בדיקה', today(), '', 'date') +
+       fText('puBy', 'שם הבודק', 'מנהל איכות', '') + '</div>';
+  h += '<div class="field"><label>הערות / ממצאים</label><textarea id="puNotes"></textarea></div>';
+  h += '<div class="modal-actions">' +
+    '<button class="btn" onclick="savePreUse(\'' + l.id + '\',\'released\')">שחרור</button>' +
+    '<button class="btn warn" onclick="savePreUse(\'' + l.id + '\',\'hold\')">השארה בהסגר</button>' +
+    '<button class="btn danger" onclick="savePreUse(\'' + l.id + '\',\'blocked\')">חסימה</button>' +
+    '</div><div style="text-align:center;margin-top:8px;"><button class="btn ghost sm" onclick="closeModal()">ביטול</button></div>';
+  openModal(h);
+}
+
+function savePreUse(lotId, decision){
+  var l = byId(DB.lots, lotId);
+  var m = byId(DB.materials, l.materialId);
+  var items = {}, failed = [];
+  PREUSE_CHECKS.forEach(function(c){
+    items[c.k] = chk('pu_' + c.k);
+    if(!items[c.k]) failed.push(c.t);
+  });
+  var lab = val('puLab');
+  var d = daysUntil(l.expiry);
+
+  if(decision === 'released'){
+    if(d < 0){ toast('אסור לשחרר אצווה פגת תוקף', 'bad'); return; }
+    if(failed.length){ toast('לא ניתן לשחרר — כשל בבדיקות: ' + failed.join(', '), 'bad'); return; }
+    if(m.labTest && lab !== 'pass'){ toast('המפרט מחייב תוצאת מעבדה תקינה לפני שחרור', 'bad'); return; }
+    if(lab === 'fail'){ toast('תוצאת מעבדה נכשלה — לא ניתן לשחרר', 'bad'); return; }
+  }
+
+  var c = { id:uid(), lotId:l.id, date:val('puDate') || today(), items:items, labResult:lab,
+    decision:decision, inspector:val('puBy'), notes:val('puNotes') };
+  DB.checks.push(c);
+
+  if(decision === 'released'){
+    l.status = 'released';
+    toast('אצווה ' + l.code + ' שוחררה לשימוש');
+  } else if(decision === 'blocked'){
+    l.status = 'blocked';
+    addNC({ source:'בדיקה טרם שימוש', refType:'lot', refId:l.id, severity:'major',
+      title:'אצווה ' + l.code + ' נחסמה (' + (m ? m.name : '') + ')',
+      desc:(failed.length ? 'כשל בבדיקות: ' + failed.join(', ') + '. ' : '') +
+           (lab === 'fail' ? 'תוצאת מעבדה נכשלה. ' : '') + (val('puNotes') || ''),
+      capa:'סילוק/החזרה לספק, בדיקת אצוות נוספות מאותו ספק ותחקיר שורש.' });
+    toast('האצווה נחסמה — נפתחה אי-התאמה', 'bad');
+  } else {
+    toast('האצווה נותרה בהסגר עד השלמת הבדיקות', 'bad');
+  }
+  save(); closeModal(); refresh();
+}
+
+function blockLot(lotId){
+  var l = byId(DB.lots, lotId);
+  if(!l) return;
+  var m = byId(DB.materials, l.materialId);
+  if(!confirm('לחסום את אצווה ' + l.code + '? החומר לא יהיה זמין לייצור או לשיווק.')) return;
+  l.status = 'blocked';
+  addNC({ source:'חסימת מלאי', refType:'lot', refId:l.id, severity:'major',
+    title:'אצווה ' + l.code + ' נחסמה במלאי (' + (m ? m.name : '') + ')',
+    desc:'חסימה יזומה — יתרה ' + l.remaining + ' ' + l.unit + ', תוקף ' + fmt(l.expiry) + '.',
+    capa:'החלטת מנהל איכות על סילוק, החזרה לספק או שימוש חלופי מבוקר.' });
+  save(); refresh(); toast('האצווה נחסמה');
+}
+
+/* ==========================================================================
+   5. הכנסה לייצור / שיווק ללקוח
+   ========================================================================== */
+function renderRelease(el){
+  var html = '<div class="section-head"><div><h2>שחרור לייצור ולשיווק</h2>' +
+    '<div class="sub">הנפקה מותרת רק מאצווה משוחררת · כל הנפקה מתועדת לצורך עקיבות והחזרה מהשוק</div></div></div>';
+
+  var avail = DB.lots.filter(function(l){ return l.status === 'released' && l.remaining > 0; })
+    .sort(function(a,b){ return (a.expiry || '') > (b.expiry || '') ? 1 : -1; });
+
+  html += '<div class="card"><h3 style="margin-bottom:10px;">מלאי זמין להנפקה (לפי FEFO)</h3>';
+  if(!avail.length){ html += '<div class="empty">אין אצוות משוחררות במלאי</div>'; }
+  else {
+    html += '<div class="list">' + avail.map(function(l){
+      var m = byId(DB.materials, l.materialId);
+      var d = daysUntil(l.expiry);
+      return '<div class="row" style="background:var(--card2);"><div class="top"><div>' +
+        '<div class="title">' + esc(l.code) + ' · ' + esc(m ? m.name : '') + '</div>' +
+        '<div class="meta"><span>יתרה: <b>' + l.remaining + ' ' + esc(l.unit) + '</b></span>' +
+        '<span>תוקף: ' + fmt(l.expiry) + (d <= DB.settings.expiryAlertDays ? ' <span class="tag t-warn">' + d + ' ימים</span>' : '') + '</span></div>' +
+        '</div></div><div class="actions"><button class="btn sm" onclick="issueForm(\'' + l.id + '\')">הנפקה</button></div></div>';
+    }).join('') + '</div>';
+  }
+  html += '</div>';
+
+  html += '<div class="card"><h3 style="margin-bottom:10px;">יומן הנפקות (' + DB.issues.length + ')</h3>';
+  if(!DB.issues.length){ html += '<div class="empty">טרם בוצעו הנפקות</div>'; }
+  else {
+    var sorted = DB.issues.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+    html += '<div class="table-wrap"><table><tr><th>תאריך</th><th>יעד</th><th>אצווה</th><th>חומר גלם</th><th>כמות</th><th>אסמכתה</th><th>אחראי</th></tr>' +
+      sorted.map(function(i){
+        var l = byId(DB.lots, i.lotId), m = l ? byId(DB.materials, l.materialId) : null;
+        return '<tr><td>' + fmt(i.date) + '</td><td>' +
+          (i.type === 'production' ? '<span class="tag t-info">ייצור</span>' : '<span class="tag t-ok">לקוח</span>') +
+          '</td><td>' + esc(l ? l.code : '') + '</td><td>' + esc(m ? m.name : '') + '</td>' +
+          '<td>' + i.qty + ' ' + esc(l ? l.unit : '') + '</td><td>' + esc(i.ref) + '</td><td>' + esc(i.operator || '') + '</td></tr>';
+      }).join('') + '</table></div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function issueForm(lotId){
+  var l = byId(DB.lots, lotId);
+  if(!l) return;
+  var m = byId(DB.materials, l.materialId);
+  if(l.status !== 'released'){ toast('ניתן להנפיק רק אצווה משוחררת', 'bad'); return; }
+  var d = daysUntil(l.expiry);
+
+  var h = '<h3>הנפקת אצווה ' + esc(l.code) + '</h3>' +
+    '<div class="msub">' + esc(m ? m.name : '') + ' · יתרה ' + l.remaining + ' ' + esc(l.unit) + ' · תוקף ' + fmt(l.expiry) + '</div>';
+  if(d <= DB.settings.expiryAlertDays) h += '<div class="alert a-warn">נותרו ' + d + ' ימים לתפוגה — יש להקדים שימוש באצווה זו (FEFO).</div>';
+  h += fSelect('iType', 'יעד ההנפקה', [{v:'production',t:'הכנסה לייצור'},{v:'customer',t:'שיווק ללקוח'}], 'production');
+  h += fText('iQty', 'כמות (' + esc(l.unit) + ')', '', '', 'number');
+  h += fText('iRef', 'אסמכתה — מספר אצוות ייצור / שם לקוח ומשלוח', '', 'BATCH-2411');
+  h += '<div class="grid2">' + fText('iDate', 'תאריך', today(), '', 'date') + fText('iBy', 'אחראי', '', 'ראש קו') + '</div>';
+  h += '<div class="field"><label>הערות</label><textarea id="iNotes"></textarea></div>';
+  h += '<div class="modal-actions"><button class="btn" onclick="saveIssue(\'' + l.id + '\')">אישור הנפקה</button>' +
+    '<button class="btn ghost" onclick="closeModal()">ביטול</button></div>';
+  openModal(h);
+}
+function saveIssue(lotId){
+  var l = byId(DB.lots, lotId);
+  var q = num('iQty'), ref = val('iRef'), type = val('iType');
+  if(q <= 0){ toast('יש להזין כמות', 'bad'); return; }
+  if(q > l.remaining){ toast('הכמות גדולה מהיתרה במלאי (' + l.remaining + ')', 'bad'); return; }
+  if(!ref){ toast('חובה לרשום אסמכתה — נדרשת לעקיבות', 'bad'); return; }
+  if(daysUntil(l.expiry) < 0){ toast('האצווה פגת תוקף — ההנפקה נחסמה', 'bad'); return; }
+
+  DB.issues.push({ id:uid(), lotId:l.id, type:type, qty:q, ref:ref,
+    date:val('iDate') || today(), operator:val('iBy'), notes:val('iNotes') });
+  l.remaining = Math.round((l.remaining - q) * 1000) / 1000;
+  if(l.remaining <= 0) l.status = 'consumed';
+  save(); closeModal(); refresh();
+  toast(type === 'production' ? 'הוכנס לייצור · ' + q + ' ' + l.unit : 'שווק ללקוח · ' + q + ' ' + l.unit);
+}
+
+/* ==========================================================================
+   אי-התאמות ופעולות מתקנות
+   ========================================================================== */
+function addNC(o){
+  var n = { id:uid(), number:nextNum('NC'), date:today(), source:o.source, refType:o.refType, refId:o.refId,
+    title:o.title, desc:o.desc, severity:o.severity || 'major', status:'open',
+    capa:o.capa || '', closedAt:'', closedBy:'' };
+  DB.ncs.push(n);
+  return n;
+}
+var ncFilter = 'open';
+function renderNC(el){
+  var html = '<div class="section-head"><div><h2>אי-התאמות ופעולות מתקנות</h2>' +
+    '<div class="sub">נפתחות אוטומטית בכל חריגה מהמפרט, וניתן לפתוח גם ידנית</div></div>' +
+    '<button class="btn" onclick="ncForm()">+ אי-התאמה</button></div>';
+
+  html += '<div class="filters">' + [{k:'open',t:'פתוחות'},{k:'closed',t:'סגורות'},{k:'all',t:'הכל'}].map(function(f){
+    var n = f.k === 'all' ? DB.ncs.length : DB.ncs.filter(function(x){ return x.status === f.k; }).length;
+    return '<button class="btn sm ' + (ncFilter === f.k ? '' : 'ghost') + '" onclick="ncFilter=\'' + f.k + '\';go(\'nc\')">' + f.t + ' (' + n + ')</button>';
+  }).join('') + '</div>';
+
+  var list = DB.ncs.filter(function(n){ return ncFilter === 'all' || n.status === ncFilter; })
+    .sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  if(!list.length){ el.innerHTML = html + '<div class="empty">אין אי-התאמות להצגה</div>'; return; }
+
+  html += '<div class="list">' + list.map(function(n){
+    var sev = n.severity === 'critical' ? '<span class="tag t-bad">קריטית</span>' :
+              n.severity === 'major' ? '<span class="tag t-warn">משמעותית</span>' : '<span class="tag t-mute">קלה</span>';
+    var st = n.status === 'open' ? '<span class="tag t-bad">פתוחה</span>' : '<span class="tag t-ok">סגורה</span>';
+    var ref = ncRefLabel(n);
+    return '<div class="row"><div class="top"><div>' +
+      '<div class="title">' + esc(n.number) + ' · ' + esc(n.title) + '</div>' +
+      '<div class="meta"><span>' + fmt(n.date) + '</span><span>מקור: ' + esc(n.source) + '</span>' +
+      (ref ? '<span>קישור: ' + esc(ref) + '</span>' : '') + '</div>' +
+      '<div class="meta" style="margin-top:6px;">' + sev + st +
+        (n.status === 'closed' ? '<span class="tag t-mute">נסגרה ' + fmt(n.closedAt) + ' ע"י ' + esc(n.closedBy) + '</span>' : '') + '</div>' +
+      '<div class="alert a-info" style="margin-top:8px;"><b>תיאור:</b> ' + esc(n.desc) + '</div>' +
+      (n.capa ? '<div class="alert a-warn"><b>פעולה מתקנת:</b> ' + esc(n.capa) + '</div>' : '') +
+      '</div></div><div class="actions">' +
+        (n.status === 'open' ? '<button class="btn sm" onclick="closeNCForm(\'' + n.id + '\')">סגירה</button>' : '') +
+        '<button class="btn sm ghost" onclick="ncForm(\'' + n.id + '\')">עריכה</button>' +
+        '<button class="btn sm danger" onclick="delNC(\'' + n.id + '\')">מחיקה</button>' +
+      '</div></div>';
+  }).join('') + '</div>';
+  el.innerHTML = html;
+}
+function ncRefLabel(n){
+  if(n.refType === 'receipt'){ var r = byId(DB.receipts, n.refId); return r ? 'קבלה ' + r.number : ''; }
+  if(n.refType === 'lot'){ var l = byId(DB.lots, n.refId); return l ? 'אצווה ' + l.code : ''; }
+  return '';
+}
+function ncForm(id){
+  var n = id ? byId(DB.ncs, id) : null;
+  var isNew = !n;
+  n = n || { title:'', desc:'', severity:'major', source:'יזום', capa:'', date:today() };
+  var h = '<h3>' + (isNew ? 'פתיחת אי-התאמה' : 'עריכת ' + esc(n.number)) + '</h3>' +
+    '<div class="msub">תיעוד החריגה, ההשלכה על בטיחות המזון והפעולה המתקנת</div>';
+  h += fText('nTitle', 'כותרת', n.title, 'חריגת טמפרטורה בקבלה');
+  h += '<div class="grid2">' +
+    fSelect('nSev', 'חומרה', [{v:'critical',t:'קריטית'},{v:'major',t:'משמעותית'},{v:'minor',t:'קלה'}], n.severity) +
+    fText('nDate', 'תאריך', n.date, '', 'date') + '</div>';
+  h += fText('nSource', 'מקור הגילוי', n.source, 'קבלה במחסן / ייצור / תלונת לקוח');
+  h += '<div class="field"><label>תיאור החריגה</label><textarea id="nDesc">' + esc(n.desc) + '</textarea></div>';
+  h += '<div class="field"><label>פעולה מתקנת ומונעת (CAPA)</label><textarea id="nCapa">' + esc(n.capa) + '</textarea></div>';
+  h += '<div class="modal-actions"><button class="btn" onclick="saveNC(' + (isNew ? 'null' : "'" + id + "'") + ')">שמירה</button>' +
+    '<button class="btn ghost" onclick="closeModal()">ביטול</button></div>';
+  openModal(h);
+}
+function saveNC(id){
+  var t = val('nTitle');
+  if(!t){ toast('חובה למלא כותרת', 'bad'); return; }
+  var obj = { title:t, severity:val('nSev'), date:val('nDate') || today(), source:val('nSource'),
+    desc:val('nDesc'), capa:val('nCapa') };
+  if(id){
+    var n = byId(DB.ncs, id);
+    for(var k in obj) n[k] = obj[k];
+    toast('אי-ההתאמה עודכנה');
+  } else {
+    obj.id = uid(); obj.number = nextNum('NC'); obj.status = 'open';
+    obj.refType = ''; obj.refId = ''; obj.closedAt = ''; obj.closedBy = '';
+    DB.ncs.push(obj);
+    toast('נפתחה אי-התאמה ' + obj.number);
+  }
+  save(); closeModal(); refresh();
+}
+function closeNCForm(id){
+  var n = byId(DB.ncs, id);
+  var h = '<h3>סגירת אי-התאמה ' + esc(n.number) + '</h3><div class="msub">' + esc(n.title) + '</div>';
+  h += '<div class="field"><label>סיכום הפעולה המתקנת שבוצעה</label><textarea id="ncClose">' + esc(n.capa) + '</textarea></div>';
+  h += fText('ncBy', 'נסגר ע"י', 'מנהל איכות', '');
+  h += '<div class="modal-actions"><button class="btn" onclick="doCloseNC(\'' + id + '\')">אישור סגירה</button>' +
+    '<button class="btn ghost" onclick="closeModal()">ביטול</button></div>';
+  openModal(h);
+}
+function doCloseNC(id){
+  var n = byId(DB.ncs, id);
+  var by = val('ncBy');
+  if(!by){ toast('יש לציין מי סוגר את אי-ההתאמה', 'bad'); return; }
+  n.capa = val('ncClose'); n.status = 'closed'; n.closedAt = today(); n.closedBy = by;
+  save(); closeModal(); refresh(); toast('אי-ההתאמה נסגרה');
+}
+function delNC(id){
+  if(!confirm('למחוק את רשומת אי-ההתאמה?')) return;
+  DB.ncs = DB.ncs.filter(function(n){ return n.id !== id; });
+  save(); refresh(); toast('הרשומה נמחקה');
+}
+
+/* ==========================================================================
+   עקיבות — שרשרת מלאה משני הכיוונים
+   ========================================================================== */
+var traceQ = '';
+function renderTrace(el){
+  var html = '<div class="section-head"><div><h2>עקיבות</h2>' +
+    '<div class="sub">חיפוש לפי אצווה פנימית, אצוות ספק, אצוות ייצור או שם לקוח</div></div>' +
+    '<button class="btn ghost sm" onclick="window.print()">הדפסה</button></div>';
+  html += '<div class="filters"><input id="trQ" placeholder="לדוגמה: LOT-0001 / BATCH-2411 / שם לקוח" value="' + esc(traceQ) + '"></div>';
+  html += '<div id="trResult"></div>';
+  el.innerHTML = html;
+  var inp = document.getElementById('trQ');
+  inp.oninput = function(){ traceQ = inp.value; drawTrace(); };
+  drawTrace();
+}
+function drawTrace(){
+  var box = document.getElementById('trResult');
+  if(!box) return;
+  var q = traceQ.trim();
+  if(!q){
+    box.innerHTML = '<div class="empty">הזן מזהה לחיפוש. ניתן גם ללחוץ "עקיבות" בכרטיס אצווה.</div>' +
+      '<div class="card"><h3 style="margin-bottom:8px;">אצוות במערכת</h3><div class="table-wrap"><table>' +
+      '<tr><th>אצווה</th><th>חומר גלם</th><th>ספק</th><th>סטטוס</th><th>יתרה</th></tr>' +
+      DB.lots.map(function(l){
+        var m = byId(DB.materials, l.materialId), s = byId(DB.suppliers, l.supplierId);
+        return '<tr><td><a href="#" onclick="traceLot(\'' + l.id + '\');return false;" style="color:var(--info)">' + esc(l.code) + '</a></td>' +
+          '<td>' + esc(m ? m.name : '') + '</td><td>' + esc(s ? s.name : '') + '</td>' +
+          '<td>' + esc(LOT_STATUS[l.status]) + '</td><td>' + l.remaining + ' ' + esc(l.unit) + '</td></tr>';
+      }).join('') + '</table></div></div>';
+    return;
+  }
+  var hits = DB.lots.filter(function(l){
+    var r = byId(DB.receipts, l.receiptId);
+    var m = byId(DB.materials, l.materialId);
+    var iss = DB.issues.filter(function(i){ return i.lotId === l.id; });
+    var hay = [l.code, r ? r.supplierLot : '', r ? r.number : '', m ? m.name : '', m ? m.code : '']
+      .concat(iss.map(function(i){ return i.ref; })).join(' ');
+    return hay.toLowerCase().indexOf(q.toLowerCase()) > -1;
+  });
+  if(!hits.length){ box.innerHTML = '<div class="empty">לא נמצאה התאמה ל"' + esc(q) + '"</div>'; return; }
+  box.innerHTML = hits.map(function(l){ return traceCard(l); }).join('');
+}
+function traceLot(lotId){
+  var l = byId(DB.lots, lotId);
+  if(!l) return;
+  traceQ = l.code;
+  go('trace');
+}
+function traceCard(l){
+  var m = byId(DB.materials, l.materialId), s = byId(DB.suppliers, l.supplierId);
+  var r = byId(DB.receipts, l.receiptId);
+  var po = r && r.poId ? byId(DB.pos, r.poId) : null;
+  var cs = DB.checks.filter(function(c){ return c.lotId === l.id; });
+  var iss = DB.issues.filter(function(i){ return i.lotId === l.id; });
+  var ncs = DB.ncs.filter(function(n){ return (n.refType === 'lot' && n.refId === l.id) ||
+                                              (n.refType === 'receipt' && r && n.refId === r.id); });
+
+  var h = '<div class="card"><h3>שרשרת עקיבות · ' + esc(l.code) + ' — ' + esc(m ? m.name : '') + '</h3>' +
+    '<div class="sub" style="font-size:0.7rem;color:var(--muted);margin:4px 0 12px;">סטטוס: ' + esc(LOT_STATUS[l.status]) +
+    ' · יתרה ' + l.remaining + ' מתוך ' + l.qty + ' ' + esc(l.unit) + ' · תוקף ' + fmt(l.expiry) + '</div><div class="chain">';
+
+  h += step('ok', 'מפרט חומר גלם ' + (m ? m.code : ''),
+    m ? (m.name + ' · גרסה ' + m.version + ' · אחסון ' + m.storage + ' ' + m.tempMin + '° עד ' + m.tempMax + '°' +
+      (m.allergens.length ? ' · אלרגנים: ' + m.allergens.join(', ') : '')) : 'המפרט נמחק');
+
+  h += step(po ? 'ok' : 'mute', po ? 'רכש ' + po.number : 'רכש — ללא הזמנה',
+    po ? ('ספק: ' + (s ? s.name : '') + ' · ' + po.qty + ' ' + po.unit + ' · הוזמן ' + fmt(po.orderDate) + ' · מפרט גרסה ' + po.specVersion)
+       : 'הקבלה בוצעה ללא הזמנת רכש מקושרת');
+
+  h += step(r && r.decision === 'rejected' ? 'bad' : 'ok', r ? 'קבלה במחסן ' + r.number : 'קבלה',
+    r ? ('ספק: ' + (s ? s.name : '') + ' · אצוות ספק ' + r.supplierLot + ' · ' + r.qty + ' ' + r.unit +
+      ' · טמפ\' ' + r.temp + '°C · התקבל ' + fmt(r.date) + ' · בדק: ' + (r.inspector || '—') +
+      ((r.findings || []).length ? ' · ממצאים: ' + r.findings.join('; ') : '')) : '');
+
+  if(cs.length){
+    cs.forEach(function(c){
+      var k = c.decision === 'released' ? 'ok' : (c.decision === 'blocked' ? 'bad' : 'warn');
+      h += step(k, 'בדיקה טרם שימוש — ' + (c.decision === 'released' ? 'שוחרר' : c.decision === 'blocked' ? 'נחסם' : 'הושאר בהסגר'),
+        fmt(c.date) + ' · בודק: ' + (c.inspector || '—') + ' · מעבדה: ' +
+        (c.labResult === 'pass' ? 'תקין' : c.labResult === 'fail' ? 'נכשל' : 'לא נדרש') +
+        (c.notes ? ' · ' + c.notes : ''));
+    });
+  } else {
+    h += step('mute', 'בדיקה טרם שימוש', 'טרם בוצעה — האצווה חסומה לשימוש');
+  }
+
+  if(iss.length){
+    iss.forEach(function(i){
+      h += step('ok', i.type === 'production' ? 'הכנסה לייצור' : 'שיווק ללקוח',
+        fmt(i.date) + ' · ' + i.qty + ' ' + l.unit + ' · אסמכתה: ' + i.ref + ' · אחראי: ' + (i.operator || '—') +
+        (i.notes ? ' · ' + i.notes : ''));
+    });
+  } else {
+    h += step('mute', 'הנפקה', 'טרם הונפק מהאצווה');
+  }
+
+  if(ncs.length){
+    ncs.forEach(function(n){
+      h += step(n.status === 'open' ? 'bad' : 'warn', 'אי-התאמה ' + n.number + (n.status === 'open' ? ' (פתוחה)' : ' (סגורה)'),
+        n.title + ' · ' + n.desc);
+    });
+  }
+  h += '</div></div>';
+  return h;
+}
+function step(kind, title, desc){
+  return '<div class="step"><div class="dot-col"><div class="dot ' + (kind === 'ok' ? '' : kind) + '"></div><div class="bar"></div></div>' +
+    '<div class="body"><div class="st">' + esc(title) + '</div><div class="sd">' + esc(desc) + '</div></div></div>';
+}
+
+/* ==========================================================================
+   הגדרות, גיבוי ושחזור
+   ========================================================================== */
+function renderSettings(el){
+  var S = DB.settings;
+  var h = '<div class="section-head"><div><h2>הגדרות וגיבוי</h2>' +
+    '<div class="sub">פרמטרים של מנוע הבקרה וניהול הנתונים</div></div></div>';
+
+  h += '<div class="card"><h3 style="margin-bottom:12px;">פרמטרי בקרה</h3>' +
+    fText('setPlant', 'שם המפעל', S.plant, '') +
+    fText('setExpAlert', 'התראת תפוגה מראש (ימים)', S.expiryAlertDays, '', 'number') +
+    '<label class="check"><input type="checkbox" id="setBlock" ' + (S.blockUnapprovedSupplier ? 'checked' : '') + '>' +
+    '<div><div class="ct">חסימת רכש מספק שאינו מאושר</div>' +
+    '<div class="cs">מונע פתיחת הזמנה לספק מושעה, בהערכה או בעל תעודה שפגה</div></div></label>' +
+    '<button class="btn" style="margin-top:8px;" onclick="saveSettings()">שמירת הגדרות</button></div>';
+
+  h += '<div class="card"><h3 style="margin-bottom:6px;">כללי הבקרה הקבועים במערכת</h3>' +
+    '<div style="font-size:0.74rem;color:#bbb;line-height:2;">' +
+    '· לא ניתן לרכוש חומר גלם ללא מפרט מאושר<br>' +
+    '· כשל בבדיקת קבלה קריטית פוסל את המשלוח ופותח אי-התאמה קריטית<br>' +
+    '· חריגת טמפרטורה מטווח המפרט נקבעת אוטומטית לפי המדידה בשדה<br>' +
+    '· כל משלוח שנקלט נכנס להסגר — אין שימוש ישיר מהקבלה<br>' +
+    '· שחרור מהסגר מותנה במעבר כל בדיקות "טרם שימוש" ובתוצאת מעבדה תקינה כשנדרשת במפרט<br>' +
+    '· אצווה פגת תוקף אינה ניתנת לשחרור או להנפקה<br>' +
+    '· כל הנפקה לייצור או ללקוח מחייבת אסמכתה — בסיס לעקיבות ולהחזרה מהשוק' +
+    '</div></div>';
+
+  h += '<div class="card"><h3 style="margin-bottom:10px;">גיבוי ושחזור</h3>' +
+    '<div style="font-size:0.74rem;color:var(--muted);margin-bottom:10px;">הנתונים נשמרים בדפדפן המקומי בלבד. מומלץ לייצא גיבוי באופן שוטף.</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+    '<button class="btn" onclick="exportData()">ייצוא גיבוי (JSON)</button>' +
+    '<button class="btn ghost" onclick="document.getElementById(\'impFile\').click()">ייבוא גיבוי</button>' +
+    '<button class="btn warn" onclick="resetDemo()">איפוס לנתוני דמו</button>' +
+    '<button class="btn danger" onclick="wipeAll()">מחיקת כל הנתונים</button>' +
+    '</div><input type="file" id="impFile" accept="application/json" style="display:none">' +
+    '<div style="font-size:0.72rem;color:var(--muted);margin-top:12px;">' +
+    'רשומות במערכת: ' + DB.materials.length + ' מפרטים · ' + DB.suppliers.length + ' ספקים · ' +
+    DB.pos.length + ' הזמנות · ' + DB.receipts.length + ' קבלות · ' + DB.lots.length + ' אצוות · ' +
+    DB.checks.length + ' בדיקות · ' + DB.issues.length + ' הנפקות · ' + DB.ncs.length + ' אי-התאמות</div></div>';
+
+  el.innerHTML = h;
+  document.getElementById('impFile').onchange = importData;
+}
+function saveSettings(){
+  DB.settings.plant = val('setPlant') || 'מפעל מזון';
+  DB.settings.expiryAlertDays = num('setExpAlert') || 14;
+  DB.settings.blockUnapprovedSupplier = chk('setBlock');
+  save();
+  document.getElementById('plantLine').textContent = DB.settings.plant + ' · בקרת חומרי גלם לפי תוכנית בטיחות מזון (HACCP)';
+  refresh(); toast('ההגדרות נשמרו');
+}
+function exportData(){
+  var blob = new Blob([JSON.stringify(DB, null, 2)], { type:'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'food-safety-backup-' + today() + '.json';
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  toast('קובץ הגיבוי נוצר');
+}
+function importData(e){
+  var f = e.target.files[0];
+  if(!f) return;
+  var fr = new FileReader();
+  fr.onload = function(){
+    try{
+      var d = JSON.parse(fr.result);
+      if(!d.materials || !d.lots) throw new Error('bad');
+      if(!confirm('הייבוא יחליף את כל הנתונים הקיימים. להמשיך?')) return;
+      DB = d;
+      if(!DB.settings) DB.settings = defaultSettings();
+      if(!DB.counters) DB.counters = {};
+      save(); refresh(); toast('הגיבוי יובא בהצלחה');
+    }catch(err){ toast('קובץ לא תקין', 'bad'); }
+    e.target.value = '';
+  };
+  fr.readAsText(f);
+}
+function resetDemo(){
+  if(!confirm('לאפס את המערכת לנתוני הדמו? כל הנתונים הנוכחיים יימחקו.')) return;
+  DB = seed(); save(); refresh(); toast('המערכת אופסה לנתוני דמו');
+}
+function wipeAll(){
+  if(!confirm('למחוק את כל הנתונים ולהתחיל ממערכת ריקה?')) return;
+  DB = { settings:defaultSettings(), counters:{}, suppliers:[], materials:[], pos:[],
+         receipts:[], lots:[], checks:[], issues:[], ncs:[] };
+  save(); refresh(); toast('כל הנתונים נמחקו');
+}
+
+/* ==========================================================================
+   אתחול
+   ========================================================================== */
+document.getElementById('modalBg').addEventListener('click', function(e){
+  if(e.target.id === 'modalBg') closeModal();
+});
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+
+load();
+document.getElementById('plantLine').textContent = DB.settings.plant + ' · בקרת חומרי גלם לפי תוכנית בטיחות מזון (HACCP)';
+buildNav();
+go('dashboard');
+</script>
+</body>
+</html>
